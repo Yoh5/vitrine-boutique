@@ -1,0 +1,103 @@
+---
+import Boutique from '../../../layouts/Boutique.astro';
+import Icone from '../../../components/Icone.astro';
+import { LANGS, ui, dh, type Lang } from '../../../i18n/ui';
+import { produits, zones, type Produit } from '../../../lib/api';
+import { codes, photo, SEUIL_RARE } from '../../../lib/catalogue';
+
+export async function getStaticPaths() {
+  const tous = await produits();
+  const code = codes(tous);
+  const z = await zones();
+  return LANGS.flatMap((lang) => tous.map((p) => ({ params: { lang, slug: p.slug }, props: { p, code: code[p.id], zones: z } })));
+}
+
+const lang = Astro.params.lang as Lang;
+const { p, code, zones: z } = Astro.props as { p: Produit; code: string; zones: Awaited<ReturnType<typeof zones>> };
+const t = ui[lang];
+const ph = photo(p.slug);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const nom = p.nom[lang];
+const description = p.description?.[lang] ?? '';
+const moinsCher = Math.min(...z.map((x) => Number(x.frais_dh)));
+const seuil = Math.min(...z.filter((x) => x.livraison_offerte_des !== null).map((x) => Number(x.livraison_offerte_des)));
+const stockTexte = p.stock === 0 ? t.epuise : p.stock <= SEUIL_RARE ? t.plus_que(p.stock) : t.en_stock;
+---
+<Boutique lang={lang} titre={`${nom} — ${t.nom}`} description={description || nom} chemin={`produit/${p.slug}/`} barre prix={{ [p.id]: Number(p.prix_dh) }}>
+  <main class="page">
+    <div class="contenu">
+      <a class="retour" href={`${base}/${lang}/#rayon-${p.categorie}`}><Icone nom="retour" />{t.retour}</a>
+      <div class="fiche">
+        <div class="vitrine">
+          <div class="objet">
+            {ph ? <img src={`${base}/photos/${ph.fichier}`} alt={nom} width="900" height="900" decoding="async" />
+                : <div class="sans-photo">{nom}</div>}
+          </div>
+          <div class="planche" aria-hidden="true"></div>
+        </div>
+        <div>
+          <div class="grande-etiquette">
+            <div class="code">{t.case} {code}</div>
+            <h1>{nom}</h1>
+            <div class="prix nombre">{dh(p.prix_dh, lang)}</div>
+            <div class:list={['stock', p.stock <= SEUIL_RARE ? 'rare' : 'ok']} id="stock" data-stock={p.stock}>{stockTexte}</div>
+          </div>
+          {description && <p class="description">{description}</p>}
+          <div class="achat" data-id={p.id} data-stock={p.stock}>
+            <div class="quantite" role="group" aria-label={t.quantite}>
+              <button type="button" data-delta="-1" aria-label={t.moins}><Icone nom="moins" /></button>
+              <output class="nombre" aria-live="polite">1</output>
+              <button type="button" data-delta="1" aria-label={t.plus}><Icone nom="plus" /></button>
+            </div>
+            <button class="btn btn-action" type="button" id="poser" disabled={p.stock === 0}>
+              <Icone nom="panier" />{t.ajouter}
+            </button>
+          </div>
+          <ul class="infos">
+            <li><Icone nom="camion" />{t.livraison} : {dh(moinsCher, lang)} · {t.offerte_des(dh(seuil, lang))}</li>
+            <li><Icone nom="colis" />{t.a_la_livraison}</li>
+          </ul>
+          {ph && <p class="indice">{t.credits} : {ph.auteur}, {ph.licence}</p>}
+        </div>
+      </div>
+    </div>
+  </main>
+</Boutique>
+
+<script>
+  import { poser, quantite } from '../../../lib/panier';
+  import { stocks } from '../../../lib/api';
+  import { ui, type Lang } from '../../../i18n/ui';
+  import { SEUIL_RARE } from '../../../lib/catalogue';
+
+  const t = ui[document.documentElement.lang as Lang];
+  const achat = document.querySelector<HTMLElement>('.achat')!;
+  const id = Number(achat.dataset.id);
+  let stock = Number(achat.dataset.stock);
+  const sortie = achat.querySelector('output')!;
+  const bouton = document.getElementById('poser') as HTMLButtonElement;
+  let n = 1;
+  const max = () => Math.max(0, Math.min(20, stock) - quantite(id));
+  const maj = () => {
+    n = Math.max(1, Math.min(n, max() || 1));
+    sortie.textContent = String(n);
+    bouton.disabled = max() === 0;
+  };
+  achat.querySelectorAll<HTMLButtonElement>('[data-delta]').forEach((b) =>
+    b.addEventListener('click', () => { n += Number(b.dataset.delta); maj(); }));
+  bouton.addEventListener('click', () => {
+    poser(id, Math.min(n, max()));
+    bouton.lastChild!.textContent = `${t.ajoute} · ${quantite(id)}`;
+    n = 1; maj();
+  });
+  maj();
+  stocks().then((l) => {
+    const s = l.find((x) => x.id === id)?.stock;
+    if (s === undefined) return;
+    stock = s;
+    const el = document.getElementById('stock')!;
+    el.textContent = s === 0 ? t.epuise : s <= SEUIL_RARE ? t.plus_que(s) : t.en_stock;
+    el.className = `stock ${s <= SEUIL_RARE ? 'rare' : 'ok'}`;
+    maj();
+  }).catch(() => {});
+</script>

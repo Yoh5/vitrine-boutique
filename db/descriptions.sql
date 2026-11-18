@@ -1,0 +1,27 @@
+-- Descriptions de démonstration (boutique fictive : aucune promesse de qualité, d'origine certifiée ni de label).
+update produits p set description = d.v::jsonb from (values
+('huile-argan-100', '{"fr":"Huile d''argan en flacon de verre, pour le visage, les cheveux et les mains.","ar":"زيت الأركان في قارورة زجاجية، للوجه والشعر واليدين.","en":"Argan oil in a glass bottle, for face, hair and hands."}'),
+('huile-argan-50', '{"fr":"Le petit format, à glisser dans un coffret ou un sac de voyage.","ar":"الحجم الصغير، يوضع في علبة هدايا أو حقيبة سفر.","en":"The small size, for a gift box or a travel bag."}'),
+('savon-noir-eucalyptus', '{"fr":"Savon noir à l''huile d''olive, parfumé à l''eucalyptus, pour le gommage au hammam.","ar":"صابون بلدي بزيت الزيتون، معطر بالكاليبتوس، لتقشير الحمام.","en":"Olive-oil black soap scented with eucalyptus, for the hammam scrub."}'),
+('ghassoul-250', '{"fr":"Argile lavante en poudre, à mélanger à l''eau de rose pour un masque.","ar":"طين غسول مسحوق، يمزج بماء الورد لقناع.","en":"Washing clay powder, mixed with rose water for a mask."}'),
+('eau-de-rose', '{"fr":"Eau florale de rose, en lotion tonique ou dans les pâtisseries.","ar":"ماء الورد، كمنعش للبشرة أو في الحلويات.","en":"Rose flower water, as a toner or in pastries."}'),
+('gant-kessa', '{"fr":"Le gant rugueux du hammam, à utiliser après le savon noir.","ar":"كيس الحمام الخشن، يستعمل بعد الصابون البلدي.","en":"The rough hammam glove, used after the black soap."}'),
+('the-vert-menthe', '{"fr":"Thé vert en grains roulés, la base du thé à la menthe.","ar":"شاي أخضر بحبات ملفوفة، أساس الشاي بالنعناع.","en":"Rolled-leaf green tea, the base of mint tea."}'),
+('theiere-argentee', '{"fr":"Théière en métal argenté gravé, pour servir de haut comme il se doit.","ar":"براد من المعدن الفضي المنقوش، للسقي من الأعلى كما ينبغي.","en":"Engraved silver-plated teapot, for pouring from high as it should be."}'),
+('verres-beldi-6', '{"fr":"Six verres à thé colorés, chacun d''une teinte.","ar":"ستة كؤوس شاي ملونة، لكل واحدة لونها.","en":"Six coloured tea glasses, each a different shade."}'),
+('huilier-argente', '{"fr":"Huilier argenté ciselé : burettes et plateau, pour la table des grandes occasions.","ar":"مزيتة فضية منقوشة: قارورات وصينية، لمائدة المناسبات.","en":"Chased silver cruet set: cruets and tray, for the special-occasion table."}'),
+('melange-epices-the', '{"fr":"Feuilles d''herbes séchées à ajouter au thé, selon la saison.","ar":"أعشاب مجففة تضاف إلى الشاي، حسب الموسم.","en":"Dried herb leaves to add to tea, depending on the season."}'),
+('poterie-safi', '{"fr":"Poterie de Safi peinte à la main : chaque pièce est un peu différente.","ar":"فخار آسفي مرسوم باليد: كل قطعة مختلفة قليلا.","en":"Hand-painted Safi pottery: every piece is slightly different."}'),
+('tajine-decoratif', '{"fr":"Tajine décoratif émaillé, pour la table ou l''étagère, pas pour le feu.","ar":"طاجين مزخرف مطلي، للمائدة أو الرف، ليس للطهي.","en":"Glazed decorative tajine, for the table or the shelf, not for cooking."}'),
+('assiette-fes', '{"fr":"Assiette de Fès aux motifs géométriques, à accrocher ou à servir.","ar":"صحن فاسي بنقوش هندسية، للتعليق أو التقديم.","en":"Fez plate with geometric patterns, to hang or to serve."}'),
+('photophore-cuivre', '{"fr":"Lanterne ajourée : la bougie dessine ses motifs sur les murs.","ar":"فانوس مخرم: الشمعة ترسم نقوشه على الجدران.","en":"Pierced lantern: the candle draws its pattern on the walls."}'),
+('babouches-cuir-jaune', '{"fr":"Babouches en cuir, la couleur classique des souks.","ar":"بلغة جلدية، اللون الكلاسيكي للأسواق.","en":"Leather babouches, the classic souk colour."}'),
+('babouches-brodees', '{"fr":"Babouches brodées de fil, pour la maison ou les fêtes.","ar":"بلغة مطرزة بالخيط، للبيت أو للمناسبات.","en":"Thread-embroidered babouches, for home or celebrations."}'),
+('fouta-hammam', '{"fr":"Fouta en coton tissé : serviette de hammam, de plage ou nappe.","ar":"فوطة من القطن المنسوج: منشفة للحمام أو الشاطئ أو غطاء مائدة.","en":"Woven cotton fouta: hammam towel, beach towel or tablecloth."}'),
+('coussin-berbere', '{"fr":"Housse de coussin aux motifs berbères, sans rembourrage.","ar":"غطاء وسادة بنقوش أمازيغية، بدون حشو.","en":"Cushion cover with Berber patterns, without filling."}'),
+('sac-panier-osier', '{"fr":"Panier tressé à anses en cuir, pour le marché ou la plage.","ar":"قفة منسوجة بمقابض جلدية، للسوق أو الشاطئ.","en":"Woven basket with leather handles, for the market or the beach."}'),
+('coffret-hammam', '{"fr":"Savon noir, ghassoul, gant kessa et eau de rose, dans une boîte.","ar":"صابون بلدي، غاسول، كيس وماء الورد، في علبة.","en":"Black soap, ghassoul, kessa glove and rose water, in one box."}'),
+('coffret-the', '{"fr":"Théière, verres et thé : tout pour servir le premier thé.","ar":"براد وكؤوس وشاي: كل ما يلزم لتقديم أول كأس.","en":"Teapot, glasses and tea: everything to serve the first round."}'),
+('coffret-mariage', '{"fr":"Le coffret à offrir aux mariés, composé avec la famille.","ar":"علبة الهدايا للعروسين، تحضر مع العائلة.","en":"The gift box for the newlyweds, put together with the family."}'),
+('coffret-aid', '{"fr":"Un seul exemplaire : il sert à montrer ce qui se passe quand deux clients veulent la dernière pièce.","ar":"نسخة واحدة فقط: تبين ما يحدث حين يريد زبونان آخر قطعة.","en":"Only one in stock: it shows what happens when two customers want the last piece."}')
+) as d(slug, v) where p.slug = d.slug;

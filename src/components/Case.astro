@@ -1,0 +1,35 @@
+---
+import Icone from './Icone.astro';
+import { ui, dh, type Lang } from '../i18n/ui';
+import { photo, SEUIL_RARE } from '../lib/catalogue';
+import type { Produit } from '../lib/api';
+
+interface Props { p: Produit; lang: Lang; code: string }
+const { p, lang, code } = Astro.props;
+const t = ui[lang];
+const ph = photo(p.slug);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const nom = p.nom[lang];
+const stockTexte = p.stock === 0 ? t.epuise : p.stock <= SEUIL_RARE ? t.plus_que(p.stock) : t.en_stock;
+const recherche = [p.nom.fr, p.nom.ar, p.nom.en, code].join(' ').toLowerCase();
+---
+<li class:list={['case', { epuise: p.stock === 0 }]} data-id={p.id} data-stock={p.stock} data-recherche={recherche}>
+  <a href={`${base}/${lang}/produit/${p.slug}/`}>
+    <div class="objet">
+      {ph
+        ? <img src={`${base}/photos/${ph.fichier}`} alt={nom} width="480" height="480" loading="lazy" decoding="async" />
+        : <div class="sans-photo">{nom}</div>}
+    </div>
+    <div class="planche" aria-hidden="true"></div>
+    <div class="etiquette">
+      <span class="code" aria-label={`${t.case} ${code}`}>{code}</span>
+      <div class="nom">{nom}</div>
+      <div class="prix nombre">{dh(p.prix_dh, lang)}</div>
+      <div class:list={['stock', p.stock <= SEUIL_RARE ? 'rare' : 'ok']}>{stockTexte}</div>
+    </div>
+  </a>
+  <button class="poser" type="button" data-id={p.id} disabled={p.stock === 0}
+          data-libelle={t.ajouter} data-libelle-sur={t.ajoute}>
+    <Icone nom="plus" taille={18} /><span>{t.ajouter}</span>
+  </button>
+</li>

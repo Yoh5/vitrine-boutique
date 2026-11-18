@@ -1,0 +1,109 @@
+---
+import Boutique from '../../layouts/Boutique.astro';
+import Case from '../../components/Case.astro';
+import Icone from '../../components/Icone.astro';
+import { LANGS, ui, CATEGORIES, RAYON, type Lang } from '../../i18n/ui';
+import { produits } from '../../lib/api';
+import { codes } from '../../lib/catalogue';
+
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+
+const lang = Astro.params.lang as Lang;
+const t = ui[lang];
+const tous = await produits();
+const code = codes(tous);
+const prix = Object.fromEntries(tous.map((p) => [p.id, Number(p.prix_dh)]));
+const rayons = CATEGORIES.map((c) => ({ c, items: tous.filter((p) => p.categorie === c) })).filter((r) => r.items.length);
+---
+<Boutique lang={lang} titre={`${t.nom} — ${t.sous_titre}`} description={t.sous_titre} barre prix={prix}>
+  <div class="outils">
+    <div class="contenu">
+      <h1 class="sr">{t.nom} — {t.sous_titre}</h1>
+      <label class="recherche">
+        <span class="sr">{t.chercher}</span>
+        <Icone nom="chercher" />
+        <input type="search" placeholder={t.chercher} autocomplete="off" id="recherche" />
+      </label>
+      <nav class="rayons" aria-label={t.rayons}>
+        {rayons.map((r) => (
+          <a href={`#rayon-${r.c}`}><span class="lettre">{RAYON[r.c]}</span>{t.categories[r.c]}</a>
+        ))}
+      </nav>
+    </div>
+  </div>
+
+  <main class="etagere">
+    <div class="contenu">
+      {rayons.map((r) => (
+        <section class="rayon" id={`rayon-${r.c}`} aria-labelledby={`titre-${r.c}`}>
+          <h2 id={`titre-${r.c}`}><span class="lettre" aria-hidden="true">{RAYON[r.c]}</span>{t.categories[r.c]}</h2>
+          <ul class="planches">
+            {r.items.map((p) => <Case p={p} lang={lang} code={code[p.id]} />)}
+          </ul>
+        </section>
+      ))}
+      <p class="vide-recherche" hidden id="vide-recherche">{t.aucun_resultat}</p>
+    </div>
+  </main>
+</Boutique>
+
+<script>
+  import { poser, quantite, surChangement } from '../../lib/panier';
+  import { stocks } from '../../lib/api';
+  import { ui, type Lang } from '../../i18n/ui';
+  import { SEUIL_RARE } from '../../lib/catalogue';
+
+  const lang = document.documentElement.lang as Lang;
+  const t = ui[lang];
+  const boutons = [...document.querySelectorAll<HTMLButtonElement>('.case .poser')];
+
+  function etatBoutons() {
+    for (const b of boutons) {
+      const n = quantite(Number(b.dataset.id));
+      b.dataset.sur = n > 0 ? 'true' : 'false';
+      b.querySelector('span')!.textContent = n > 0 ? `${b.dataset.libelleSur} · ${n}` : b.dataset.libelle!;
+    }
+  }
+  for (const b of boutons) {
+    b.addEventListener('click', () => {
+      const li = b.closest<HTMLElement>('.case')!;
+      const stock = Number(li.dataset.stock);
+      if (quantite(Number(b.dataset.id)) >= Math.min(stock, 20)) return;   // la base refuserait de toute façon
+      poser(Number(b.dataset.id), 1);
+    });
+  }
+  etatBoutons();
+  surChangement(etatBoutons);
+
+  // Stock vivant : la page a été générée à l'avance, la base dit ce qu'il reste maintenant.
+  stocks().then((liste) => {
+    const parId = new Map(liste.map((s) => [s.id, s.stock]));
+    for (const li of document.querySelectorAll<HTMLElement>('.case')) {
+      const s = parId.get(Number(li.dataset.id));
+      if (s === undefined || s === Number(li.dataset.stock)) continue;
+      li.dataset.stock = String(s);
+      li.classList.toggle('epuise', s === 0);
+      const el = li.querySelector<HTMLElement>('.stock')!;
+      el.textContent = s === 0 ? t.epuise : s <= SEUIL_RARE ? t.plus_que(s) : t.en_stock;
+      el.className = `stock ${s <= SEUIL_RARE ? 'rare' : 'ok'}`;
+      li.querySelector<HTMLButtonElement>('.poser')!.disabled = s === 0;
+    }
+  }).catch(() => { /* la page reste lisible avec le stock de la génération */ });
+
+  // Recherche sur les étagères : par nom dans les trois langues ou par code de case.
+  const champ = document.getElementById('recherche') as HTMLInputElement;
+  const vide = document.getElementById('vide-recherche')!;
+  champ.addEventListener('input', () => {
+    const q = champ.value.trim().toLowerCase();
+    let visibles = 0;
+    for (const sec of document.querySelectorAll<HTMLElement>('.rayon')) {
+      let n = 0;
+      for (const li of sec.querySelectorAll<HTMLElement>('.case')) {
+        const ok = !q || li.dataset.recherche!.includes(q);
+        li.hidden = !ok; if (ok) n++;
+      }
+      sec.hidden = n === 0; visibles += n;
+    }
+    vide.hidden = visibles > 0;
+  });
+</script>

@@ -1,0 +1,107 @@
+---
+import '../styles/hanout.css';
+import Icone from '../components/Icone.astro';
+import { LANGS, dir, ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  titre: string;
+  description?: string;
+  chemin?: string;              // chemin sans la langue, pour le sélecteur (« produit/huile-argan-100 »)
+  barre?: boolean;              // barre du comptoir en bas
+  prix?: Record<number, number>; // pour l'estimation de la barre ; le vrai total vient de la base
+}
+const { lang, titre, description, chemin = '', barre = false, prix = {} } = Astro.props;
+const t = ui[lang];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const lien = (l: Lang) => `${base}/${l}/${chemin}`.replace(/\/+$/, '/') ;
+---
+<!doctype html>
+<html lang={lang} dir={dir(lang)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titre}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="theme-color" content="#0a4250" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={new URL(lien(l), Astro.site).href} />)}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Kalam:wght@400;700&family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Lalezar&display=swap" />
+  </head>
+  <body>
+    <header class="enseigne">
+      <div class="contenu">
+        <a class="marque" href={`${base}/${lang}/`} aria-label={`${t.nom} — ${t.sous_titre}`}>
+          <span class="latin">Dar Hdiya</span>
+          <span class="arabe" lang="ar">دار الهدية</span>
+        </a>
+        <nav class="langues" aria-label="Langue / اللغة / Language">
+          {LANGS.map((l) => (
+            <a href={lien(l)} hreflang={l} lang={l} aria-current={l === lang ? 'true' : undefined}>
+              {l === 'ar' ? 'ع' : l.toUpperCase()}
+              <span class="sr">{ui[l].langue}</span>
+            </a>
+          ))}
+        </nav>
+      </div>
+    </header>
+
+    <slot />
+
+    <footer class="pied">
+      <div class="contenu">
+        <h2>{t.preuve_titre}</h2>
+        <ul class="preuves">{t.preuves.map((p) => <li>{p}</li>)}</ul>
+        <p class="petit">{t.essayer_codes}</p>
+        <p class="demo">{t.demo}</p>
+        <p class="petit">
+          <a href={`${base}/${lang}/suivi/`}>{t.suivi_titre}</a> ·
+          <a href={`${base}/${lang}/credits/`}>{t.credits}</a> ·
+          <a href="https://yoh5.github.io/my_portfolio_website/" rel="noopener">{t.demo_par}</a>
+        </p>
+      </div>
+    </footer>
+
+    {barre && (
+      <aside class="comptoir-barre" aria-label={t.comptoir_titre} data-prix={JSON.stringify(prix)} data-lang={lang}>
+        <div class="contenu">
+          <p class="resume" aria-live="polite">
+            <span class="nb nombre">{t.articles(0)}</span>
+            <span class="est nombre"></span>
+          </p>
+          <a class="btn btn-action" href={`${base}/${lang}/comptoir/`}>
+            <Icone nom="panier" />{t.au_comptoir}
+          </a>
+        </div>
+      </aside>
+    )}
+
+    <script>
+      import { lirePanier, surChangement, nbArticles } from '../lib/panier';
+      import { ui, dh, type Lang } from '../i18n/ui';
+      const barre = document.querySelector<HTMLElement>('.comptoir-barre');
+      if (barre) {
+        const lang = barre.dataset.lang as Lang;
+        const prix: Record<string, number> = JSON.parse(barre.dataset.prix ?? '{}');
+        const nb = barre.querySelector<HTMLElement>('.nb')!;
+        const est = barre.querySelector<HTMLElement>('.est')!;
+        const lien = barre.querySelector<HTMLAnchorElement>('.btn-action')!;
+        let avant = -1;
+        const maj = () => {
+          const p = lirePanier();
+          const n = nbArticles(p);
+          nb.textContent = ui[lang].articles(n);
+          const somme = p.reduce((s, l) => s + (prix[l.produit_id] ?? 0) * l.quantite, 0);
+          est.textContent = n ? `${dh(somme, lang)} ${ui[lang].estime}` : '';
+          lien.setAttribute('aria-disabled', n ? 'false' : 'true');
+          if (avant >= 0 && n !== avant) { nb.classList.remove('bump'); void nb.offsetWidth; nb.classList.add('bump'); }
+          avant = n;
+        };
+        maj();
+        surChangement(maj);
+      }
+    </script>
+  </body>
+</html>

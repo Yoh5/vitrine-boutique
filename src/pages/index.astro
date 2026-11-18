@@ -1,0 +1,7 @@
+---
+// La racine renvoie vers le français ; les autres langues sont dans le sélecteur.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8" /><meta http-equiv="refresh" content={`0; url=${base}/fr/`} /><link rel="canonical" href={`${base}/fr/`} /><title>Dar Hdiya</title></head>
+<body><a href={`${base}/fr/`}>Dar Hdiya</a></body></html>

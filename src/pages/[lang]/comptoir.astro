@@ -1,0 +1,255 @@
+---
+import Boutique from '../../layouts/Boutique.astro';
+import Icone from '../../components/Icone.astro';
+import { LANGS, ui, type Lang } from '../../i18n/ui';
+import { produits, zones } from '../../lib/api';
+
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+
+const lang = Astro.params.lang as Lang;
+const t = ui[lang];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const tous = await produits();
+const z = await zones();
+// Pour l'affichage seulement (noms) ; les montants viennent de la base.
+const noms = Object.fromEntries(tous.map((p) => [p.id, { nom: p.nom[lang], slug: p.slug }]));
+---
+<Boutique lang={lang} titre={`${t.comptoir_titre} — ${t.nom}`} chemin="comptoir/">
+  <main class="page">
+    <div class="contenu">
+      <a class="retour" href={`${base}/${lang}/`}><Icone nom="retour" />{t.retour}</a>
+      <h1>{t.comptoir_titre}</h1>
+      <p class="intro">{t.comptoir_intro}</p>
+
+      <div id="comptoir" class="comptoir" data-noms={JSON.stringify(noms)} data-base={base}>
+        <section class="carnet" aria-labelledby="titre-carnet">
+          <span class="tampon" id="tampon">{lang === 'ar' ? 'حسبته القاعدة' : lang === 'en' ? 'Added up by the database' : 'Compté par la base'}</span>
+          <h2 id="titre-carnet">{t.nom}</h2>
+          <p id="vide" hidden>{t.comptoir_vide} <a href={`${base}/${lang}/`}>{t.retour}</a></p>
+          <ol id="lignes" aria-live="polite"></ol>
+          <div class="totaux" id="totaux" hidden>
+            <div><span>{t.sous_total}</span><span class="nombre" id="sous-total"></span></div>
+            <div id="ligne-remise" hidden><span>{t.remise} <span id="code-applique"></span></span><span class="nombre" id="remise"></span></div>
+            <div><span>{t.livraison} <span id="delai" class="indice"></span></span><span class="nombre" id="frais"></span></div>
+            <div class="total"><span>{t.total}</span><span class="nombre" id="total"></span></div>
+          </div>
+          <p class="etat" id="etat" role="status"></p>
+        </section>
+
+        <form class="formulaire" id="formulaire" novalidate>
+          <fieldset>
+            <legend>{t.livraison}</legend>
+            <div class="champ">
+              <label for="zone">{t.ville}</label>
+              <select id="zone" name="zone">
+                {z.map((x) => <option value={x.id}>{x.nom[lang]} · {x.delai}</option>)}
+              </select>
+              <span class="aide" id="seuil"></span>
+            </div>
+            <div class="champ">
+              <label for="code">{t.code_promo}</label>
+              <div class="promo">
+                <input id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="erreur-code" />
+                <button class="btn" type="button" id="appliquer">{t.appliquer}</button>
+              </div>
+              <span class="erreur" id="erreur-code" aria-live="polite"></span>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>{t.coordonnees}</legend>
+            <div class="champ">
+              <label for="nom">{t.nom_complet}</label>
+              <input id="nom" name="nom" autocomplete="name" required maxlength="80" aria-describedby="erreur-nom" />
+              <span class="erreur" id="erreur-nom" aria-live="polite"></span>
+            </div>
+            <div class="champ">
+              <label for="telephone">{t.telephone}</label>
+              <input id="telephone" name="telephone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required aria-describedby="aide-tel erreur-telephone" />
+              <span class="aide" id="aide-tel">{t.telephone_aide}</span>
+              <span class="erreur" id="erreur-telephone" aria-live="polite"></span>
+            </div>
+            <div class="champ">
+              <label for="adresse">{t.adresse}</label>
+              <textarea id="adresse" name="adresse" autocomplete="street-address" required maxlength="300" aria-describedby="erreur-adresse"></textarea>
+              <span class="erreur" id="erreur-adresse" aria-live="polite"></span>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>{t.paiement}</legend>
+            <label class="choix"><input type="radio" name="paiement" value="livraison" checked /><span>{t.a_la_livraison}</span></label>
+            <label class="choix inactif"><input type="radio" name="paiement" value="carte" disabled /><span>{t.carte}<span class="note">{t.carte_note}</span></span></label>
+          </fieldset>
+
+          <p class="erreur-globale" id="erreur-globale" role="alert"></p>
+          <button class="btn btn-action" type="submit" id="commander"><Icone nom="ok" />{t.commander}</button>
+        </form>
+      </div>
+
+      <section id="bon" class="bon" hidden aria-live="polite" tabindex="-1">
+        <span class="tampon-recu">{t.commande_ok}</span>
+        <h2>{t.commande_ok}</h2>
+        <p>{t.numero}</p>
+        <p class="numero" id="bon-numero"></p>
+        <p id="bon-total" class="nombre"></p>
+        <p class="indice">{t.garder_numero}</p>
+        <div class="actions">
+          <a class="btn" id="bon-suivre" href="#"><Icone nom="colis" />{t.suivre}</a>
+          <a class="btn btn-whatsapp" id="bon-whatsapp" href="#" target="_blank" rel="noopener"><Icone nom="message" />{t.whatsapp}</a>
+        </div>
+        <p class="indice">{t.whatsapp_note}</p>
+      </section>
+    </div>
+  </main>
+</Boutique>
+
+<script>
+  import { apercu, commander, stocks, ErreurBoutique, type Calcul, type Ligne } from '../../lib/api';
+  import { lirePanier, fixer, vider, surChangement } from '../../lib/panier';
+  import { ui, dh, type Lang } from '../../i18n/ui';
+
+  const lang = document.documentElement.lang as Lang;
+  const t = ui[lang];
+  const racine = document.getElementById('comptoir')!;
+  const noms: Record<string, { nom: string; slug: string }> = JSON.parse(racine.dataset.noms!);
+  const base = racine.dataset.base!;
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+  const zone = $<HTMLSelectElement>('zone');
+  const champCode = $<HTMLInputElement>('code');
+  const ol = $<HTMLOListElement>('lignes');
+  const etat = $('etat');
+  const tampon = $('tampon');
+  let codeApplique: string | null = sessionStorage.getItem('darhdiya:code');
+  zone.value = localStorage.getItem('darhdiya:zone') ?? zone.value;
+  if (codeApplique) champCode.value = codeApplique;
+  let dernier: Calcul | null = null;
+  let deja = new Set<number>();
+  let jeton = 0;
+
+  const msg = (code: string) => t.erreurs[code] ?? t.erreurs.reseau;
+
+  function dessinerLignes(p: Ligne[], calc: Calcul | null, rayes: Map<number, number>) {
+    ol.replaceChildren(...p.map((l) => {
+      const li = document.createElement('li');
+      if (!deja.has(l.produit_id)) li.classList.add('ecrit');
+      const max = rayes.get(l.produit_id);
+      if (max !== undefined) li.classList.add('raye');
+      const montant = calc?.lignes.find((x) => x.produit_id === l.produit_id);
+      li.innerHTML = `
+        <span class="ligne-nom"></span>
+        <span class="ligne-montant nombre"></span>
+        <span class="ligne-outils">
+          <span class="quantite" role="group">
+            <button type="button" data-d="-1" aria-label="${t.moins}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+            <output class="nombre">${l.quantite}</output>
+            <button type="button" data-d="1" aria-label="${t.plus}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+          </span>
+          <button type="button" class="retirer">${t.retirer}</button>
+          <span class="erreur"></span>
+        </span>`;
+      const info = noms[l.produit_id];
+      li.querySelector('.ligne-nom')!.textContent = `${l.quantite} × ${info?.nom ?? '?'}`;
+      li.querySelector('.ligne-montant')!.textContent = montant ? dh(montant.prix * montant.quantite, lang) : '…';
+      if (max !== undefined) li.querySelector('.erreur')!.textContent = max === 0 ? t.epuise : t.plus_que(max);
+      li.querySelectorAll<HTMLButtonElement>('[data-d]').forEach((b) =>
+        b.addEventListener('click', () => fixer(l.produit_id, l.quantite + Number(b.dataset.d))));
+      li.querySelector('.retirer')!.addEventListener('click', () => fixer(l.produit_id, 0));
+      return li;
+    }));
+    deja = new Set(p.map((l) => l.produit_id));
+  }
+
+  function dessinerTotaux(c: Calcul | null) {
+    $('totaux').hidden = !c;
+    tampon.classList.toggle('visible', !!c);
+    if (!c) return;
+    $('sous-total').textContent = dh(c.sous_total, lang);
+    $('ligne-remise').hidden = !Number(c.remise);
+    $('remise').textContent = `− ${dh(c.remise, lang)}`;
+    $('code-applique').textContent = c.code ? `(${c.code})` : '';
+    $('frais').textContent = Number(c.frais) === 0 ? t.offerte : dh(c.frais, lang);
+    $('delai').textContent = `· ${c.delai}`;
+    $('total').textContent = dh(c.total, lang);
+    $('seuil').textContent = c.livraison_offerte_des !== null ? t.offerte_des(dh(c.livraison_offerte_des, lang)) : '';
+  }
+
+  /** Demande le compte à la base. Les réponses arrivées dans le désordre sont ignorées. */
+  async function compter() {
+    const p = lirePanier();
+    const n = ++jeton;
+    $('vide').hidden = p.length > 0;
+    $('formulaire').toggleAttribute('hidden', p.length === 0);
+    if (!p.length) { ol.replaceChildren(); dessinerTotaux(null); etat.textContent = ''; return; }
+    dessinerLignes(p, dernier, new Map());
+    etat.textContent = t.compte;
+    try {
+      const c = await apercu(p, Number(zone.value), codeApplique);
+      if (n !== jeton) return;
+      dernier = c;
+      dessinerLignes(p, c, new Map()); dessinerTotaux(c); etat.textContent = '';
+    } catch (e) {
+      if (n !== jeton) return;
+      const code = e instanceof ErreurBoutique ? e.code : 'reseau';
+      if (['code_invalide', 'code_expire', 'minimum_non_atteint'].includes(code)) {
+        $('erreur-code').textContent = msg(code);       // la base refuse le code : on recompte sans lui
+        codeApplique = null; sessionStorage.removeItem('darhdiya:code');
+        return compter();
+      }
+      if (code === 'stock_insuffisant' || code === 'produit_indisponible') {
+        const s = new Map((await stocks().catch(() => [])).map((x) => [x.id, x.stock]));
+        const rayes = new Map(p.filter((l) => (s.get(l.produit_id) ?? 0) < l.quantite).map((l) => [l.produit_id, s.get(l.produit_id) ?? 0]));
+        dessinerLignes(p, null, rayes);
+      }
+      dessinerTotaux(null);
+      etat.textContent = msg(code);
+    }
+  }
+
+  zone.addEventListener('change', () => { localStorage.setItem('darhdiya:zone', zone.value); compter(); });
+  $('appliquer').addEventListener('click', () => {
+    $('erreur-code').textContent = '';   // effacé seulement quand on retente un code
+    codeApplique = champCode.value.trim().toUpperCase() || null;
+    if (codeApplique) sessionStorage.setItem('darhdiya:code', codeApplique); else sessionStorage.removeItem('darhdiya:code');
+    compter();
+  });
+  champCode.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('appliquer').click(); } });
+  surChangement(() => compter());
+  compter();
+
+  // ---------------------------------------------------------------- commande
+  const form = $<HTMLFormElement>('formulaire');
+  const CHAMPS: Record<string, string> = { nom_invalide: 'nom', telephone_invalide: 'telephone', adresse_invalide: 'adresse' };
+  function erreurChamp(champ: string, texte: string) {
+    $(`erreur-${champ}`).textContent = texte;
+    $(champ).setAttribute('aria-invalid', texte ? 'true' : 'false');
+  }
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    for (const c of ['nom', 'telephone', 'adresse']) erreurChamp(c, '');
+    $('erreur-globale').textContent = '';
+    const f = new FormData(form);
+    const bouton = $<HTMLButtonElement>('commander');
+    bouton.disabled = true; bouton.setAttribute('aria-busy', 'true');
+    try {
+      const p = lirePanier();
+      const r = await commander(p, Number(zone.value), codeApplique,
+        String(f.get('nom') ?? ''), String(f.get('telephone') ?? ''), String(f.get('adresse') ?? ''));
+      const lignes = p.map((l) => `• ${l.quantite} × ${noms[l.produit_id]?.nom}`).join('\n');
+      $('bon-numero').textContent = r.numero;
+      $('bon-total').textContent = `${t.total} : ${dh(r.total, lang)} · ${t.delai} : ${r.delai}`;
+      $<HTMLAnchorElement>('bon-suivre').href = `${base}/${lang}/suivi/?n=${encodeURIComponent(r.numero)}`;
+      $<HTMLAnchorElement>('bon-whatsapp').href = `https://wa.me/?text=${encodeURIComponent(t.wa_message(r.numero, lignes, dh(r.total, lang)))}`;
+      vider(); sessionStorage.removeItem('darhdiya:code');
+      racine.hidden = true; document.querySelector('.intro')!.setAttribute('hidden', '');
+      const bon = $('bon'); bon.hidden = false; bon.focus();
+    } catch (err) {
+      const code = err instanceof ErreurBoutique ? err.code : 'reseau';
+      if (CHAMPS[code]) { erreurChamp(CHAMPS[code], msg(code)); $(CHAMPS[code]).focus(); }
+      else { $('erreur-globale').textContent = msg(code); compter(); }
+    } finally {
+      bouton.disabled = false; bouton.removeAttribute('aria-busy');
+    }
+  });
+</script>

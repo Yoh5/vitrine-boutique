@@ -5,3 +5,5 @@ dist/
 .astro/
 .impeccable/questions/
 .impeccable/tmp/
+.playwright-mcp/
+.impeccable/review/

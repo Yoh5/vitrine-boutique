@@ -1,0 +1,19 @@
+---
+import Boutique from '../../layouts/Boutique.astro';
+import { LANGS, ui, type Lang } from '../../i18n/ui';
+import { toutesLesPhotos } from '../../lib/catalogue';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = ui[lang];
+---
+<Boutique lang={lang} titre={`${t.credits} — ${t.nom}`} chemin="credits/">
+  <main class="page"><div class="contenu">
+    <h1>{t.credits}</h1>
+    <p class="intro">Wikimedia Commons</p>
+    <ul>
+      {toutesLesPhotos().map(([slug, p]) => (
+        <li><a href={p.source} rel="noopener">{p.titre.replace(/^File:/, '')}</a> — {p.auteur}, {p.licence}</li>
+      ))}
+    </ul>
+  </div></main>
+</Boutique>

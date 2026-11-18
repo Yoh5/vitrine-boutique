@@ -13,10 +13,10 @@ insert into produits (slug, categorie, nom, prix_dh, stock) values
 ('the-vert-menthe',      'the',      '{"fr":"Thé vert gunpowder 250 g","ar":"شاي أخضر 250 غ","en":"Gunpowder green tea 250 g"}', 40, 90),
 ('theiere-argentee',     'the',      '{"fr":"Théière argentée gravée","ar":"براد فضي منقوش","en":"Engraved silver teapot"}', 260, 15),
 ('verres-beldi-6',       'the',      '{"fr":"6 verres à thé beldi","ar":"6 كؤوس شاي بلدية","en":"6 beldi tea glasses"}', 150, 25),
-('plateau-cuivre',       'the',      '{"fr":"Plateau en cuivre martelé","ar":"صينية نحاسية مطروقة","en":"Hammered copper tray"}', 320, 10),
+('huilier-argente',      'the',      '{"fr":"Huilier argenté ciselé","ar":"مزيتة فضية منقوشة","en":"Chased silver cruet set"}', 320, 10),
 ('melange-epices-the',   'the',      '{"fr":"Mélange d''herbes pour thé","ar":"خليط أعشاب الشاي","en":"Herbal tea blend"}', 30, 100),
 -- poterie
-('bol-safi-bleu',        'poterie',  '{"fr":"Bol de Safi bleu","ar":"زلافة آسفي زرقاء","en":"Blue Safi bowl"}', 90, 30),
+('poterie-safi',         'poterie',  '{"fr":"Poterie de Safi peinte","ar":"فخار آسفي مرسوم","en":"Painted Safi pottery"}', 90, 30),
 ('tajine-decoratif',     'poterie',  '{"fr":"Tajine décoratif peint main","ar":"طاجين مزخرف مرسوم باليد","en":"Hand-painted decorative tajine"}', 180, 12),
 ('assiette-fes',         'poterie',  '{"fr":"Assiette de Fès motif zellige","ar":"صحن فاسي بنقش الزليج","en":"Fez plate, zellige pattern"}', 140, 20),
 ('photophore-cuivre',    'poterie',  '{"fr":"Photophore ajouré en cuivre","ar":"فانوس نحاسي مخرم","en":"Pierced copper lantern"}', 210, 8),

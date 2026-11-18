@@ -1,0 +1,80 @@
+---
+import Boutique from '../../layouts/Boutique.astro';
+import Icone from '../../components/Icone.astro';
+import { LANGS, ui, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = ui[lang];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<Boutique lang={lang} titre={`${t.suivi_titre} — ${t.nom}`} chemin="suivi/">
+  <main class="page">
+    <div class="contenu">
+      <a class="retour" href={`${base}/${lang}/`}><Icone nom="retour" />{t.retour}</a>
+      <h1>{t.suivi_titre}</h1>
+      <p class="intro">{t.suivi_intro}</p>
+      <div class="comptoir">
+        <form class="formulaire" id="suivi" novalidate>
+          <div class="champ">
+            <label for="numero">{t.numero}</label>
+            <input id="numero" name="numero" required autocomplete="off" dir="ltr" placeholder="DH-261118-1A2B3" spellcheck="false" />
+          </div>
+          <div class="champ">
+            <label for="tel">{t.telephone}</label>
+            <input id="tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required />
+          </div>
+          <p class="erreur-globale" id="erreur" role="alert"></p>
+          <button class="btn btn-action" type="submit"><Icone nom="chercher" />{t.chercher_commande}</button>
+        </form>
+        <section class="bon" id="resultat" hidden aria-live="polite" tabindex="-1">
+          <p>{t.numero}</p>
+          <p class="numero" id="r-numero"></p>
+          <p id="r-infos" class="indice nombre"></p>
+          <ol class="etapes" id="r-etapes"></ol>
+          <ul id="r-lignes"></ul>
+        </section>
+      </div>
+    </div>
+  </main>
+</Boutique>
+
+<script>
+  import { suivre, ErreurBoutique } from '../../lib/api';
+  import { ui, dh, type Lang } from '../../i18n/ui';
+  const lang = document.documentElement.lang as Lang;
+  const t = ui[lang];
+  const $ = (id: string) => document.getElementById(id)!;
+  const n = new URLSearchParams(location.search).get('n');
+  if (n) (document.getElementById('numero') as HTMLInputElement).value = n;   // jamais le téléphone dans l'adresse
+
+  const ORDRE = ['recue', 'confirmee', 'expediee', 'livree'] as const;
+  document.getElementById('suivi')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target as HTMLFormElement);
+    $('erreur').textContent = ''; $('resultat').hidden = true;
+    try {
+      const r = await suivre(String(f.get('numero') ?? ''), String(f.get('tel') ?? ''));
+      if (!r) { $('erreur').textContent = t.introuvable; return; }
+      $('r-numero').textContent = r.numero;
+      const date = new Date(r.cree_le).toLocaleString(lang === 'ar' ? 'ar-MA' : lang === 'en' ? 'en-GB' : 'fr-FR',
+        { dateStyle: 'long', timeStyle: 'short', numberingSystem: 'latn' });
+      $('r-infos').textContent = `${t.passee_le} ${date} · ${t.total} : ${dh(r.total, lang)} · ${r.delai}`;
+      const rang = ORDRE.indexOf(r.statut as (typeof ORDRE)[number]);
+      $('r-etapes').replaceChildren(...(r.statut === 'annulee' ? ['annulee'] : ORDRE).map((s, i) => {
+        const li = document.createElement('li');
+        const fait = r.statut === 'annulee' || i <= rang;
+        li.className = fait ? 'faite' : '';
+        li.innerHTML = `<span class="pastille" aria-hidden="true">${fait ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>' : ''}</span>`;
+        li.append(t.statuts[s as keyof typeof t.statuts]);
+        return li;
+      }));
+      $('r-lignes').replaceChildren(...r.lignes.map((l) => {
+        const li = document.createElement('li'); li.textContent = `${l.quantite} × ${l.nom[lang]}`; return li;
+      }));
+      $('resultat').hidden = false; $('resultat').focus();
+    } catch (err) {
+      $('erreur').textContent = t.erreurs[err instanceof ErreurBoutique ? err.code : 'reseau'] ?? t.erreurs.reseau;
+    }
+  });
+</script>
