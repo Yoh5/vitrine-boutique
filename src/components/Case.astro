@@ -1,7 +1,7 @@
 ---
 import Icone from './Icone.astro';
 import { ui, dh, type Lang } from '../i18n/ui';
-import { photo, SEUIL_RARE } from '../lib/catalogue';
+import { photo, SEUIL_RARE, insecable } from '../lib/catalogue';
 import type { Produit } from '../lib/api';
 
 interface Props { p: Produit; lang: Lang; code: string }
@@ -9,7 +9,7 @@ const { p, lang, code } = Astro.props;
 const t = ui[lang];
 const ph = photo(p.slug);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const nom = p.nom[lang];
+const nom = insecable(p.nom[lang]);
 const stockTexte = p.stock === 0 ? t.epuise : p.stock <= SEUIL_RARE ? t.plus_que(p.stock) : t.en_stock;
 const recherche = [p.nom.fr, p.nom.ar, p.nom.en, code].join(' ').toLowerCase();
 ---

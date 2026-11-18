@@ -18,3 +18,6 @@ export function codes(tous: Produit[]): Record<number, string> {
 }
 
 export const SEUIL_RARE = 3;
+
+/** Espace insécable entre un nombre et son unité : « 250 g » ne se coupe jamais. */
+export const insecable = (s: string) => s.replace(/(\d) (ml|g|kg|مل|غ)(?=$|[\s,.])/g, '$1\u00a0$2');

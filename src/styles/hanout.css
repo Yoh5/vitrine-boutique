@@ -173,7 +173,7 @@ html { scrollbar-color: var(--bois) var(--mur); }
 .case > a:hover .etiquette { rotate: 0deg; }
 .etiquette .nom {
   font-family: var(--f-main); font-weight: 700; font-size: 1.05rem; line-height: 1.2;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.4em;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.4em;
   padding-inline-end: 2.4rem; /* place du code de case */
 }
 .etiquette .prix { font-family: var(--f-main); font-weight: 700; font-size: 1.6rem; line-height: 1.1; margin-block-start: 0.15rem; }

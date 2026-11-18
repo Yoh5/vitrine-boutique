@@ -3,8 +3,8 @@ truncate lignes_commande, commandes, promos, zones, produits restart identity ca
 
 insert into produits (slug, categorie, nom, prix_dh, stock) values
 -- soins
-('huile-argan-100',      'soins',    '{"fr":"Huile d''argan pure 100 ml","ar":"زيت الأركان الخالص 100 مل","en":"Pure argan oil 100 ml"}', 120, 40),
-('huile-argan-50',       'soins',    '{"fr":"Huile d''argan pure 50 ml","ar":"زيت الأركان الخالص 50 مل","en":"Pure argan oil 50 ml"}', 70, 60),
+('huile-argan-100',      'soins',    '{"fr":"Huile d''argan 100 ml","ar":"زيت الأركان 100 مل","en":"Argan oil 100 ml"}', 120, 40),
+('huile-argan-50',       'soins',    '{"fr":"Huile d''argan 50 ml","ar":"زيت الأركان 50 مل","en":"Argan oil 50 ml"}', 70, 60),
 ('savon-noir-eucalyptus','soins',    '{"fr":"Savon noir à l''eucalyptus","ar":"الصابون البلدي بالكاليبتوس","en":"Eucalyptus black soap"}', 45, 80),
 ('ghassoul-250',         'soins',    '{"fr":"Ghassoul de l''Atlas 250 g","ar":"غاسول الأطلس 250 غ","en":"Atlas ghassoul clay 250 g"}', 35, 70),
 ('eau-de-rose',          'soins',    '{"fr":"Eau de rose de Kelâa M''Gouna","ar":"ماء الورد من قلعة مكونة","en":"Kelaa M''Gouna rose water"}', 50, 50),
