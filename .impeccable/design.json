@@ -1,0 +1,451 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-11-18T21:58:22+00:00",
+ "title": "Design System: Dar Hdiya",
+ "extensions": {
+  "colorMeta": {
+   "etagere": {
+    "role": "primary",
+    "displayName": "Émail d'étagère",
+    "canonical": "#0f5c6e",
+    "tonalRamp": [
+     "#093843",
+     "#0f5e70",
+     "#15839d",
+     "#1ca9ca",
+     "#43c6e5",
+     "#78d7ed",
+     "#aee7f4",
+     "#e4f7fb"
+    ]
+   },
+   "etagere-fonce": {
+    "role": "primary",
+    "displayName": "Émail profond",
+    "canonical": "#0a4250",
+    "tonalRamp": [
+     "#083844",
+     "#0e5e71",
+     "#14839f",
+     "#19a8cc",
+     "#41c6e7",
+     "#77d6ee",
+     "#ade7f5",
+     "#e4f7fc"
+    ]
+   },
+   "mur": {
+    "role": "neutral",
+    "displayName": "Mur chaulé",
+    "canonical": "#e9eeec",
+    "tonalRamp": [
+     "#212b27",
+     "#384841",
+     "#4e655c",
+     "#648176",
+     "#86a297",
+     "#a9bcb4",
+     "#cbd7d2",
+     "#eef2f0"
+    ]
+   },
+   "mur-clair": {
+    "role": "neutral",
+    "displayName": "Mur clair",
+    "canonical": "#f6f8f7",
+    "tonalRamp": [
+     "#212b26",
+     "#384840",
+     "#4e6459",
+     "#648173",
+     "#87a194",
+     "#a9bcb2",
+     "#cbd7d1",
+     "#eef2f0"
+    ]
+   },
+   "bois": {
+    "role": "secondary",
+    "displayName": "Bois de planche",
+    "canonical": "#7a4e2d",
+    "tonalRamp": [
+     "#382415",
+     "#5d3c22",
+     "#825330",
+     "#a86b3e",
+     "#c58d63",
+     "#d6ad8f",
+     "#e6cebc",
+     "#f7efe9"
+    ]
+   },
+   "bois-clair": {
+    "role": "secondary",
+    "displayName": "Bois clair",
+    "canonical": "#9a6a42",
+    "tonalRamp": [
+     "#362517",
+     "#593d26",
+     "#7d5636",
+     "#a16f45",
+     "#bf9069",
+     "#d1b094",
+     "#e3cfbf",
+     "#f6efea"
+    ]
+   },
+   "bois-fonce": {
+    "role": "secondary",
+    "displayName": "Bois sombre",
+    "canonical": "#573620",
+    "tonalRamp": [
+     "#382315",
+     "#5d3a22",
+     "#835130",
+     "#a8683e",
+     "#c58a62",
+     "#d6ab8f",
+     "#e6cdbc",
+     "#f7eee9"
+    ]
+   },
+   "kraft": {
+    "role": "secondary",
+    "displayName": "Carton kraft",
+    "canonical": "#cda36b",
+    "tonalRamp": [
+     "#392913",
+     "#5f4420",
+     "#85602d",
+     "#ac7b3a",
+     "#c99b5f",
+     "#d8b88d",
+     "#e8d4ba",
+     "#f7f1e8"
+    ]
+   },
+   "kraft-clair": {
+    "role": "secondary",
+    "displayName": "Kraft clair",
+    "canonical": "#e3c99a",
+    "tonalRamp": [
+     "#3c2c11",
+     "#644a1c",
+     "#8c6827",
+     "#b48532",
+     "#d1a557",
+     "#debf87",
+     "#ebd9b7",
+     "#f8f2e7"
+    ]
+   },
+   "encre": {
+    "role": "neutral",
+    "displayName": "Encre de feutre",
+    "canonical": "#17150f",
+    "tonalRamp": [
+     "#2e2a1e",
+     "#4d4632",
+     "#6c6346",
+     "#8b7f5b",
+     "#aa9f7d",
+     "#c3bba2",
+     "#dbd6c7",
+     "#f3f1ec"
+    ]
+   },
+   "encre-douce": {
+    "role": "neutral",
+    "displayName": "Encre délavée",
+    "canonical": "#4a4f4d",
+    "tonalRamp": [
+     "#252726",
+     "#3e4240",
+     "#565c5a",
+     "#6f7673",
+     "#909795",
+     "#b0b5b3",
+     "#d0d3d1",
+     "#eff0f0"
+    ]
+   },
+   "rouge": {
+    "role": "tertiary",
+    "displayName": "Rouge d'action",
+    "canonical": "#c8102e",
+    "tonalRamp": [
+     "#470610",
+     "#76091b",
+     "#a50d26",
+     "#d41131",
+     "#ef3956",
+     "#f47187",
+     "#f8aab7",
+     "#fde3e7"
+    ]
+   },
+   "rouge-fonce": {
+    "role": "tertiary",
+    "displayName": "Rouge d'action foncé",
+    "canonical": "#9c0c23",
+    "tonalRamp": [
+     "#470510",
+     "#76091b",
+     "#a60d25",
+     "#d51030",
+     "#f03855",
+     "#f47186",
+     "#f8aab6",
+     "#fde3e7"
+    ]
+   },
+   "succes": {
+    "role": "neutral",
+    "displayName": "Vert reçu",
+    "canonical": "#1e6b47",
+    "tonalRamp": [
+     "#113c28",
+     "#1c6442",
+     "#278b5d",
+     "#32b377",
+     "#58d098",
+     "#88ddb5",
+     "#b7ebd3",
+     "#e7f8f0"
+    ]
+   },
+   "erreur": {
+    "role": "neutral",
+    "displayName": "Rouge d'erreur",
+    "canonical": "#b42318",
+    "tonalRamp": [
+     "#440d09",
+     "#70160f",
+     "#9d1f15",
+     "#ca271b",
+     "#e64e42",
+     "#ed8078",
+     "#f4b3ae",
+     "#fbe6e4"
+    ]
+   },
+   "regle": {
+    "role": "neutral",
+    "displayName": "Réglure du carnet",
+    "canonical": "#b9cfd8",
+    "tonalRamp": [
+     "#1b2b31",
+     "#2e4752",
+     "#406473",
+     "#528093",
+     "#75a1b2",
+     "#9dbcc8",
+     "#c4d7de",
+     "#ebf2f4"
+    ]
+   }
+  },
+  "typographyMeta": {
+   "display": {
+    "displayName": "Enseigne",
+    "purpose": "Nom de la boutique sur l'enseigne."
+   },
+   "display-ar": {
+    "displayName": "Enseigne arabe",
+    "purpose": "Nom et titres en arabe (Lalezar)."
+   },
+   "headline": {
+    "displayName": "Titre de rayon",
+    "purpose": "Rayons et titres de page, capitales larges."
+   },
+   "marker": {
+    "displayName": "Feutre",
+    "purpose": "Noms sur les étiquettes, lignes du carnet."
+   },
+   "marker-price": {
+    "displayName": "Prix au feutre",
+    "purpose": "Prix sur les étiquettes."
+   },
+   "marker-ar": {
+    "displayName": "Ruqaa",
+    "purpose": "Écriture manuscrite en arabe."
+   },
+   "body": {
+    "displayName": "Texte",
+    "purpose": "Texte courant et interface."
+   },
+   "body-ar": {
+    "displayName": "Texte arabe",
+    "purpose": "Texte courant en arabe (Almarai)."
+   },
+   "label": {
+    "displayName": "Code de case",
+    "purpose": "A-01 en coin d'étiquette."
+   }
+  },
+  "shadows": [
+   {
+    "name": "objet-pose",
+    "value": "0 2px 4px rgb(23 21 15 / 0.18), 0 8px 18px rgb(23 21 15 / 0.12)",
+    "purpose": "Produits, carnet, bon de commande."
+   },
+   {
+    "name": "planche",
+    "value": "0 6px 8px -4px rgb(0 0 0 / 0.45)",
+    "purpose": "Sous chaque planche."
+   },
+   {
+    "name": "etiquette-pendue",
+    "value": "0 3px 6px rgb(0 0 0 / 0.3)",
+    "purpose": "Étiquettes de prix."
+   },
+   {
+    "name": "comptoir-flottant",
+    "value": "0 10px 30px rgb(0 0 0 / 0.35)",
+    "purpose": "Comptoir à partir de 1100 px."
+   },
+   {
+    "name": "case-vide",
+    "value": "inset 0 10px 18px rgb(0 0 0 / 0.35)",
+    "purpose": "Case « composé à la commande »."
+   }
+  ],
+  "motion": [
+   {
+    "name": "ease",
+    "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "purpose": "Toutes les transitions (sortie exponentielle)."
+   },
+   {
+    "name": "ecrire",
+    "value": "clip-path inset 500ms",
+    "purpose": "Une ligne du carnet s'écrit dans le sens de lecture."
+   },
+   {
+    "name": "redresser",
+    "value": "rotate 400ms",
+    "purpose": "L'étiquette se redresse au survol."
+   },
+   {
+    "name": "bump",
+    "value": "scale 1.18 450ms",
+    "purpose": "Le compteur d'articles réagit à un ajout."
+   }
+  ],
+  "breakpoints": [
+   {
+    "name": "sm",
+    "value": "640px"
+   },
+   {
+    "name": "md",
+    "value": "960px"
+   },
+   {
+    "name": "comptoir-flottant",
+    "value": "1100px"
+   },
+   {
+    "name": "lg",
+    "value": "1280px"
+   }
+  ]
+ },
+ "components": [
+  {
+   "name": "Bouton d'action",
+   "kind": "button",
+   "refersTo": "button-action",
+   "description": "L'unique action rouge de la vue (Au comptoir, Commander).",
+   "html": "<button class=\"ds-btn-action\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Commander</button>",
+   "css": ":host{--etagere:#0f5c6e;--etagere-fonce:#0a4250;--kraft:#cda36b;--kraft-clair:#e3c99a;--encre:#17150f;--rouge:#c8102e;--rouge-fonce:#9c0c23;--mur-clair:#f6f8f7;--bois:#7a4e2d;--bois-fonce:#573620}.ds-btn-action{display:inline-flex;align-items:center;gap:.5rem;min-height:48px;padding:0 1.2rem;border-radius:6px;border:2px solid var(--rouge);background:var(--rouge);color:#fff;font:700 1rem Archivo,system-ui,sans-serif;cursor:pointer;transition:background .2s,translate .2s}.ds-btn-action:hover{background:var(--rouge-fonce);border-color:var(--rouge-fonce)}.ds-btn-action:active{translate:0 1px}.ds-btn-action:focus-visible{outline:3px solid var(--rouge);outline-offset:2px}"
+  },
+  {
+   "name": "Bouton fantôme",
+   "kind": "button",
+   "refersTo": "button-ghost",
+   "description": "Actions secondaires sur fond clair (Appliquer, Suivre).",
+   "html": "<button class=\"ds-btn-ghost\">Appliquer</button>",
+   "css": ":host{--etagere:#0f5c6e;--etagere-fonce:#0a4250;--kraft:#cda36b;--kraft-clair:#e3c99a;--encre:#17150f;--rouge:#c8102e;--rouge-fonce:#9c0c23;--mur-clair:#f6f8f7;--bois:#7a4e2d;--bois-fonce:#573620}.ds-btn-ghost{min-height:48px;padding:0 1.2rem;border-radius:6px;border:2px solid var(--encre);background:transparent;color:var(--encre);font:700 1rem Archivo,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}.ds-btn-ghost:hover{background:var(--encre);color:#fff}.ds-btn-ghost:focus-visible{outline:3px solid var(--rouge);outline-offset:2px}"
+  },
+  {
+   "name": "Puce de rayon",
+   "kind": "chip",
+   "refersTo": "chip-rayon",
+   "description": "Ancre vers un rayon, avec sa lettre.",
+   "html": "<a class=\"ds-chip\" href=\"#\"><span>A</span>Soins et hammam</a>",
+   "css": ":host{--etagere:#0f5c6e;--etagere-fonce:#0a4250;--kraft:#cda36b;--kraft-clair:#e3c99a;--encre:#17150f;--rouge:#c8102e;--rouge-fonce:#9c0c23;--mur-clair:#f6f8f7;--bois:#7a4e2d;--bois-fonce:#573620}.ds-chip{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;padding:0 .9rem;border-radius:6px;background:var(--etagere-fonce);color:#fff;text-decoration:none;font:700 1rem Archivo,system-ui,sans-serif;font-stretch:112%}.ds-chip span{color:var(--kraft-clair);font-weight:800}.ds-chip:focus-visible{outline:3px solid var(--kraft-clair);outline-offset:2px}"
+  },
+  {
+   "name": "Champ de recherche",
+   "kind": "input",
+   "refersTo": "input",
+   "description": "Recherche sur l'étagère, sur fond d'émail.",
+   "html": "<div class=\"ds-fond\"><input class=\"ds-input\" placeholder=\"Chercher sur les étagères\"></div>",
+   "css": ":host{--etagere:#0f5c6e;--etagere-fonce:#0a4250;--kraft:#cda36b;--kraft-clair:#e3c99a;--encre:#17150f;--rouge:#c8102e;--rouge-fonce:#9c0c23;--mur-clair:#f6f8f7;--bois:#7a4e2d;--bois-fonce:#573620}.ds-fond{background:var(--etagere);padding:1rem}.ds-input{width:100%;min-height:44px;border:0;border-radius:6px;padding:0 1rem;background:var(--mur-clair);color:var(--encre);font:400 1rem Archivo,system-ui,sans-serif;caret-color:var(--rouge)}.ds-input:focus-visible{outline:3px solid var(--kraft-clair);outline-offset:2px}"
+  },
+  {
+   "name": "Étiquette de prix",
+   "kind": "custom",
+   "refersTo": "etiquette",
+   "description": "Le carton accroché sous la planche : nom et prix au feutre, code de case.",
+   "html": "<div class=\"ds-fond\"><div class=\"ds-planche\"></div><div class=\"ds-etiquette\"><span class=\"ds-code\">A-01</span><div class=\"ds-nom\">Huile d'argan 100&nbsp;ml</div><div class=\"ds-prix\">120 DH</div><div class=\"ds-stock\">Plus que 2</div></div></div>",
+   "css": ":host{--etagere:#0f5c6e;--etagere-fonce:#0a4250;--kraft:#cda36b;--kraft-clair:#e3c99a;--encre:#17150f;--rouge:#c8102e;--rouge-fonce:#9c0c23;--mur-clair:#f6f8f7;--bois:#7a4e2d;--bois-fonce:#573620}.ds-fond{background:var(--etagere);padding:1rem 1rem 1.5rem;max-width:16rem}.ds-planche{height:14px;background:var(--bois);box-shadow:0 6px 8px -4px rgb(0 0 0/.45)}.ds-etiquette{position:relative;margin:-2px auto 0;width:calc(100% - 1.6rem);background:var(--kraft);color:var(--encre);padding:.85rem .7rem .6rem;border-radius:2px 2px 4px 4px;box-shadow:0 3px 6px rgb(0 0 0/.3);rotate:-1.6deg;transition:rotate .4s cubic-bezier(.16,1,.3,1)}.ds-etiquette:hover{rotate:0deg}.ds-etiquette::before{content:'';position:absolute;top:.3rem;left:50%;translate:-50% 0;width:7px;height:7px;border-radius:50%;background:var(--etagere)}.ds-code{position:absolute;top:.45rem;right:.55rem;font:700 .72rem Archivo,sans-serif;letter-spacing:.04em}.ds-nom{font:700 1.05rem/1.2 Kalam,cursive;padding-right:2.4rem}.ds-prix{font:700 1.6rem/1.1 Kalam,cursive}.ds-stock{font:700 .85rem Archivo,sans-serif;color:#9c0c23}"
+  },
+  {
+   "name": "Barre du comptoir",
+   "kind": "nav",
+   "refersTo": "comptoir-barre",
+   "description": "Nombre d'articles, estimation et accès au comptoir ; flottante à droite dès 1100 px.",
+   "html": "<div class=\"ds-comptoir\"><p><b>3 articles</b><span>530 DH estimé</span></p><a class=\"ds-go\" href=\"#\">Au comptoir</a></div>",
+   "css": ":host{--etagere:#0f5c6e;--etagere-fonce:#0a4250;--kraft:#cda36b;--kraft-clair:#e3c99a;--encre:#17150f;--rouge:#c8102e;--rouge-fonce:#9c0c23;--mur-clair:#f6f8f7;--bois:#7a4e2d;--bois-fonce:#573620}.ds-comptoir{display:flex;align-items:center;justify-content:space-between;gap:1rem;max-width:23rem;padding:.9rem 1rem;border-radius:10px;border-top:4px solid #9a6a42;background:var(--bois-fonce);color:#fff;box-shadow:0 10px 30px rgb(0 0 0/.35);font:400 1rem Archivo,system-ui,sans-serif}.ds-comptoir p{margin:0;display:grid;line-height:1.25}.ds-comptoir span{font-size:.9rem;color:var(--kraft-clair)}.ds-go{display:inline-flex;align-items:center;min-height:48px;padding:0 1.2rem;border-radius:6px;background:var(--rouge);color:#fff;font-weight:700;text-decoration:none}.ds-go:hover{background:var(--rouge-fonce)}.ds-go:focus-visible{outline:3px solid var(--kraft-clair);outline-offset:2px}"
+  }
+ ],
+ "narrative": {
+  "northStar": "Le hanout",
+  "overview": "La boutique est l'épicerie de quartier marocaine que tout commerçant connaît par cœur : une étagère émaillée bleu-vert pleine du sol au plafond, des planches de bois, un produit par case, et sous chaque produit une étiquette en carton écrite au feutre. Le client prend un produit et le pose au comptoir ; c'est le comptoir — la base de données — qui fait le compte, dans un carnet ligné. L'étiquette affiche, le comptoir décide.\n\nLa densité est celle d'un vrai rayon : beaucoup de produits visibles, une grille stricte, aucune carte blanche flottante. Les matières sont réelles (photo de bois pour les planches, fibre de carton pour les étiquettes), jamais imitées en dégradés. Le monde refuse deux choses : la grille de cartes blanches des thèmes e-commerce standard, et le décor « marocain » de convention (crème, terracotta, zellige, arcs).",
+  "keyCharacteristics": [
+   "Étagère bleu-vert engagée sur 30 à 50 % de l'écran, planches continues d'une case à l'autre.",
+   "Étiquettes manuscrites (Kalam en latin, ruqaa en arabe), légèrement de travers, accrochées sous la planche.",
+   "Un seul rouge, pour une seule action à la fois.",
+   "Le carnet du comptoir : papier ligné, chaque ligne écrite sur une réglure, total compté par la base.",
+   "Trilingue avec arabe de droite à gauche natif (propriétés logiques, inclinaisons inversées)."
+  ],
+  "rules": [
+   {
+    "name": "The One Red Rule",
+    "body": "Le rouge marque une seule action par écran (« Au comptoir », « Commander », « Poser » sur la fiche). Jamais deux boutons rouges visibles ensemble, jamais de rouge décoratif.",
+    "section": "colors"
+   },
+   {
+    "name": "The Kraft-Is-Not-Text Rule",
+    "body": "Le kraft ne porte jamais de petit texte sur l'émail (3,26:1) : il sert de matière, de contour ou de fond d'étiquette.",
+    "section": "colors"
+   },
+   {
+    "name": "The Hand-Is-The-Price Rule",
+    "body": "Tout ce que le marchand écrirait (nom sur l'étiquette, prix, lignes du carnet, totaux) est en écriture manuscrite ; tout ce que l'interface dit (boutons, aides, erreurs) est en Archivo / Almarai.",
+    "section": "typography"
+   },
+   {
+    "name": "The Real-Material Rule",
+    "body": "Une matière se montre par sa photo (bois, carton) ou pas du tout ; jamais de dégradé, de biseau ou d'embossage CSS qui imite une matière.",
+    "section": "elevation"
+   }
+  ],
+  "dos": [
+   "**Do** garder l'étagère en émail (#0f5c6e) comme surface dominante des pages de catalogue.",
+   "**Do** écrire au feutre tout ce que le marchand écrirait, et en Archivo / Almarai tout ce que l'interface dit.",
+   "**Do** montrer les matières par leur photo créditée (bois, carton) et cadrer toutes les photos de produits au même format.",
+   "**Do** afficher une case vide « composé à la commande » quand un produit n'a pas de photo, plutôt qu'un carré blanc.",
+   "**Do** utiliser les propriétés logiques et inverser les inclinaisons en arabe."
+  ],
+  "donts": [
+   "**Don't** utiliser une grille de cartes blanches, ni le décor de convention crème, terracotta, zellige.",
+   "**Don't** imiter une matière en CSS (dégradés en bandes, biseaux, embossage).",
+   "**Don't** afficher deux boutons rouges dans la même vue.",
+   "**Don't** poser du petit texte kraft sur l'émail.",
+   "**Don't** afficher un avis client, une vente ou un chiffre inventé : la boutique est fictive et le dit."
+  ]
+ }
+}

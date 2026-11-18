@@ -94,11 +94,11 @@ html { scrollbar-color: var(--bois) var(--mur); }
 .langues a:not([aria-current='true']):hover { background: rgb(255 255 255 / 0.12); }
 
 /* ---------------------------------------------------------------- rayons et recherche */
-.outils { background: var(--etagere); padding-block: 0.75rem 0.25rem; }
+.outils { background: var(--etagere); padding-block: 0.6rem 0; }
 .outils .contenu { display: grid; gap: 0.6rem; }
 .recherche { position: relative; }
 .recherche input {
-  width: 100%; min-height: 48px; border: 0; border-radius: var(--r);
+  width: 100%; min-height: 44px; border: 0; border-radius: var(--r);
   padding-inline: 2.8rem 1rem; background: var(--mur-clair); color: var(--encre);
 }
 .recherche svg { position: absolute; inset-inline-start: 0.9rem; inset-block-start: 50%; translate: 0 -50%; color: var(--encre-douce); }
@@ -114,7 +114,8 @@ html { scrollbar-color: var(--bois) var(--mur); }
 
 /* ---------------------------------------------------------------- étagère */
 .etagere { background: var(--etagere); color: var(--blanc); padding-block: 0.5rem 2.5rem; flex: 1; }
-.rayon { padding-block-start: 1.75rem; scroll-margin-top: 1rem; }
+.rayon { padding-block-start: 1.1rem; scroll-margin-top: 1rem; }
+@media (min-width: 640px) { .rayon { padding-block-start: 1.75rem; } }
 .rayon h2 {
   margin: 0 0 1rem; display: flex; align-items: baseline; gap: 0.6rem;
   font-family: var(--f-titre); font-weight: 800; font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.1rem); line-height: 1.1;
@@ -137,26 +138,29 @@ html { scrollbar-color: var(--bois) var(--mur); }
 .case { position: relative; display: flex; flex-direction: column; }
 .case > a { color: inherit; text-decoration: none; display: flex; flex-direction: column; flex: 1; }
 .case .objet {
-  margin-inline: 0.6rem; aspect-ratio: 1; border-radius: 3px 3px 0 0; overflow: hidden;
+  margin-inline: 0.6rem; aspect-ratio: 5 / 4; border-radius: 3px 3px 0 0; overflow: hidden;
   background: var(--mur-clair); box-shadow: var(--ombre);
   transition: translate 350ms var(--ease);
 }
 .case .objet img { width: 100%; height: 100%; object-fit: cover; }
-.case .objet .sans-photo {
+.objet:has(.sans-photo) { background: var(--etagere-fonce); box-shadow: inset 0 10px 18px rgb(0 0 0 / 0.35); }
+.sans-photo {
   width: 100%; height: 100%; display: grid; place-items: center; text-align: center; padding: 1rem;
-  font-family: var(--f-main); font-size: 1.05rem; color: var(--encre-douce);
+  font-family: var(--f-main); font-size: 1.15rem; line-height: 1.3; color: var(--kraft-clair);
+  outline: 2px dashed rgb(227 201 154 / 0.55); outline-offset: -12px;
 }
 /* la planche : continue d'une case à l'autre */
 .case .planche {
-  height: 14px; background: linear-gradient(var(--bois-clair) 0 3px, var(--bois) 3px 11px, var(--bois-fonce) 11px);
+  height: 14px; background: var(--bois) url('/textures/planche.webp') left center / auto 100% repeat-x; background-blend-mode: multiply;
   box-shadow: 0 6px 8px -4px rgb(0 0 0 / 0.45);
 }
+@media (min-width: 640px) { .case .objet { aspect-ratio: 1; } }
 .case > a:hover .objet { translate: 0 -4px; }
 
 /* l'étiquette en carton, accrochée sous la planche */
 .etiquette {
   position: relative; margin: -2px auto 0; width: calc(100% - 1.6rem);
-  background: var(--kraft); color: var(--encre);
+  background: var(--kraft) url('/textures/kraft.webp') center / 220px; color: var(--encre);
   padding: 0.85rem 0.7rem 0.6rem; border-radius: 2px 2px 4px 4px;
   box-shadow: 0 3px 6px rgb(0 0 0 / 0.3);
   rotate: -1.6deg; transform-origin: 50% 0;
@@ -211,6 +215,15 @@ html { scrollbar-color: var(--bois) var(--mur); }
 .comptoir-barre .resume { display: grid; line-height: 1.25; }
 .comptoir-barre .nb { font-weight: 800; }
 .comptoir-barre .est { font-size: 0.9rem; color: var(--kraft-clair); }
+@media (min-width: 1100px) {
+  .comptoir-barre {
+    position: fixed; inset-block-end: 1.25rem; inset-inline-end: 1.25rem; inset-inline-start: auto;
+    width: 23rem; border-radius: 10px; border: 0; border-block-start: 4px solid var(--bois-clair);
+    padding: 0.9rem 1rem; box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  }
+  .comptoir-barre .contenu { width: 100%; }
+  .pied { padding-block-end: 8rem; }
+}
 .comptoir-barre .nb.bump { animation: bump 450ms var(--ease); }
 @keyframes bump { 40% { scale: 1.18; } }
 
@@ -226,6 +239,8 @@ html { scrollbar-color: var(--bois) var(--mur); }
 .btn-action:hover { background: var(--rouge-fonce); border-color: var(--rouge-fonce); color: var(--blanc); }
 .btn-action:active { translate: 0 1px; }
 .btn[disabled], .btn[aria-disabled='true'] { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.btn-comptoir { border-color: var(--kraft-clair); color: var(--blanc); }
+.btn-comptoir:hover { background: var(--kraft-clair); color: var(--encre); }
 .btn-whatsapp { border-color: var(--succes); color: var(--succes); }
 .btn-whatsapp:hover { background: var(--succes); color: var(--blanc); }
 
@@ -245,14 +260,15 @@ html { scrollbar-color: var(--bois) var(--mur); }
 .fiche .vitrine { background: var(--etagere); padding: 1.25rem 1.25rem 0; border-radius: var(--r); }
 .fiche .vitrine .objet { aspect-ratio: 1; overflow: hidden; background: var(--mur-clair); box-shadow: var(--ombre); }
 .fiche .vitrine .objet img { width: 100%; height: 100%; object-fit: cover; }
-.fiche .vitrine .planche { height: 18px; margin-inline: -1.25rem; background: linear-gradient(var(--bois-clair) 0 4px, var(--bois) 4px 14px, var(--bois-fonce) 14px); }
+.fiche .vitrine .planche { height: 20px; margin-inline: -1.25rem; background: var(--bois) url('/textures/planche.webp') left center / auto 100% repeat-x; background-blend-mode: multiply; box-shadow: 0 6px 8px -4px rgb(0 0 0 / 0.45); }
 .fiche .grande-etiquette {
-  background: var(--kraft); padding: 1.4rem 1.4rem 1.2rem; border-radius: 3px; rotate: -1deg; box-shadow: 0 4px 10px rgb(0 0 0 / 0.18);
+  background: var(--kraft) url('/textures/kraft.webp') center / 260px; padding: 1.4rem 1.4rem 1.2rem; border-radius: 3px; rotate: -1deg; box-shadow: 0 4px 10px rgb(0 0 0 / 0.18);
   position: relative; max-width: 30rem;
 }
 :root[dir='rtl'] .fiche .grande-etiquette { rotate: 1deg; }
 .grande-etiquette .code { font-weight: 800; font-size: 0.85rem; letter-spacing: 0.05em; }
 .grande-etiquette h1 { font-family: var(--f-main); font-weight: 700; font-size: clamp(1.8rem, 1.4rem + 1.6vw, 2.6rem); text-transform: none; font-stretch: 100%; margin: 0.3rem 0; line-height: 1.15; }
+:root .page .grande-etiquette h1 { text-transform: none; font-stretch: 100%; } /* l'écriture du marchand, pas l'enseigne */
 .grande-etiquette .prix { font-family: var(--f-main); font-weight: 700; font-size: 2.6rem; line-height: 1; }
 .fiche .description { max-width: 60ch; font-size: 1.05rem; margin-block: 1.4rem; }
 .quantite { display: inline-flex; align-items: center; border: 2px solid var(--encre); border-radius: var(--r); }
@@ -271,21 +287,22 @@ html { scrollbar-color: var(--bois) var(--mur); }
   /* marge rouge du carnet (dessinée, pas une bordure) + lignes bleues */
   background-image:
     linear-gradient(to right, transparent 0.55rem, #e8a3a3 0.55rem calc(0.55rem + 1px), transparent calc(0.55rem + 1px)),
-    repeating-linear-gradient(transparent 0 calc(2.2rem - 1px), var(--regle) calc(2.2rem - 1px) 2.2rem);
-  background-position: 0 0, 0 1.1rem;
-  border-radius: 4px; box-shadow: var(--ombre); padding: 1.1rem 1.2rem 1.4rem 1.6rem; position: relative;
+    repeating-linear-gradient(transparent 0 calc(2.75rem - 1px), var(--regle) calc(2.75rem - 1px) 2.75rem);
+  background-position: 0 0, 0 0;
+  border-radius: 4px; box-shadow: var(--ombre); padding: 0 1.2rem 2.75rem 1.6rem; position: relative;
 }
 :root[dir='rtl'] .carnet {
   background-image:
     linear-gradient(to left, transparent 0.55rem, #e8a3a3 0.55rem calc(0.55rem + 1px), transparent calc(0.55rem + 1px)),
-    repeating-linear-gradient(transparent 0 calc(2.2rem - 1px), var(--regle) calc(2.2rem - 1px) 2.2rem);
-  padding: 1.1rem 1.6rem 1.4rem 1.2rem;
+    repeating-linear-gradient(transparent 0 calc(2.75rem - 1px), var(--regle) calc(2.75rem - 1px) 2.75rem);
+  padding: 0 1.6rem 2.75rem 1.2rem;
 }
-.carnet h2 { font-family: var(--f-main); font-size: 1.6rem; margin: 0 0 0.5rem; line-height: 2.2rem; }
+.carnet h2 { font-family: var(--f-main); font-size: 1.6rem; margin: 0; line-height: 2.75rem; }
+.carnet > p { margin: 0; line-height: 2.75rem; }
 .carnet ol { list-style: none; margin: 0; padding: 0; }
 .carnet li {
-  display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 0.75rem; align-items: center;
-  padding-block: 0.35rem; font-family: var(--f-main); font-size: 1.15rem;
+  display: grid; grid-template-columns: 1fr auto; column-gap: 0.75rem; align-items: end;
+  line-height: 2.75rem; font-family: var(--f-main); font-size: 1.15rem;
 }
 .carnet li.ecrit { animation: ecrire 500ms var(--ease) both; }
 @keyframes ecrire { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
@@ -293,17 +310,18 @@ html { scrollbar-color: var(--bois) var(--mur); }
 @keyframes ecrire-rtl { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
 .carnet .ligne-nom { font-weight: 700; }
 .carnet .ligne-montant { font-weight: 700; text-align: end; }
-.carnet .ligne-outils { grid-column: 1 / -1; display: flex; gap: 0.5rem; align-items: center; font-family: var(--f-texte); font-size: 0.9rem; }
+.carnet .ligne-outils { grid-column: 1 / -1; display: flex; gap: 0.5rem; align-items: center; height: 2.75rem; font-family: var(--f-texte); font-size: 0.9rem; line-height: 1.2; }
+.carnet .ligne-nom { line-height: 1.3; padding-block: calc((2.75rem - 1.3em) / 2); }
 .carnet .ligne-outils .quantite { border-width: 1px; }
-.carnet .ligne-outils .quantite button { width: 44px; height: 44px; }
+.carnet .ligne-outils .quantite button { width: 44px; height: calc(2.75rem - 2px); }
 .carnet .ligne-outils .retirer { min-height: 44px; border: 0; background: none; color: var(--encre-douce); text-decoration: underline; cursor: pointer; }
 .carnet li.raye .ligne-nom, .carnet li.raye .ligne-montant { text-decoration: line-through; text-decoration-color: var(--rouge); text-decoration-thickness: 2px; }
-.carnet .totaux { margin-block-start: 0.6rem; border-block-start: 2px solid var(--encre); padding-block-start: 0.4rem; font-family: var(--f-main); font-size: 1.15rem; }
-.carnet .totaux div { display: flex; justify-content: space-between; line-height: 2.2rem; }
+.carnet .totaux { background: linear-gradient(var(--encre), var(--encre)) top / 100% 2px no-repeat; font-family: var(--f-main); font-size: 1.15rem; }
+.carnet .totaux div { display: flex; justify-content: space-between; line-height: 2.75rem; }
 .carnet .totaux .total { font-size: 1.7rem; font-weight: 700; }
-.carnet .etat { font-family: var(--f-texte); font-size: 0.9rem; color: var(--encre-douce); min-height: 1.5em; }
+.carnet .etat { font-family: var(--f-texte); font-size: 0.9rem; color: var(--encre-douce); min-height: 2.75rem; }
 .carnet .tampon {
-  position: absolute; inset-block-start: 0.9rem; inset-inline-end: 1rem; rotate: -8deg;
+  position: absolute; inset-block-start: 0.6rem; inset-inline-end: 1rem; rotate: -8deg;
   border: 2px solid var(--succes); color: var(--succes); padding: 0.1rem 0.5rem; border-radius: 4px;
   font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase;
   opacity: 0; transition: opacity 250ms var(--ease);

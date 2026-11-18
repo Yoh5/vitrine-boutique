@@ -10,8 +10,9 @@ interface Props {
   chemin?: string;              // chemin sans la langue, pour le sélecteur (« produit/huile-argan-100 »)
   barre?: boolean;              // barre du comptoir en bas
   prix?: Record<number, number>; // pour l'estimation de la barre ; le vrai total vient de la base
+  actionBarre?: boolean;        // false quand la page a déjà son bouton rouge (un seul rouge par vue)
 }
-const { lang, titre, description, chemin = '', barre = false, prix = {} } = Astro.props;
+const { lang, titre, description, chemin = '', barre = false, prix = {}, actionBarre = true } = Astro.props;
 const t = ui[lang];
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const lien = (l: Lang) => `${base}/${l}/${chemin}`.replace(/\/+$/, '/') ;
@@ -71,7 +72,7 @@ const lien = (l: Lang) => `${base}/${l}/${chemin}`.replace(/\/+$/, '/') ;
             <span class="nb nombre">{t.articles(0)}</span>
             <span class="est nombre"></span>
           </p>
-          <a class="btn btn-action" href={`${base}/${lang}/comptoir/`}>
+          <a class:list={['btn', actionBarre ? 'btn-action' : 'btn-comptoir']} href={`${base}/${lang}/comptoir/`}>
             <Icone nom="panier" />{t.au_comptoir}
           </a>
         </div>
@@ -87,7 +88,7 @@ const lien = (l: Lang) => `${base}/${l}/${chemin}`.replace(/\/+$/, '/') ;
         const prix: Record<string, number> = JSON.parse(barre.dataset.prix ?? '{}');
         const nb = barre.querySelector<HTMLElement>('.nb')!;
         const est = barre.querySelector<HTMLElement>('.est')!;
-        const lien = barre.querySelector<HTMLAnchorElement>('.btn-action')!;
+        const lien = barre.querySelector<HTMLAnchorElement>('a.btn')!;
         let avant = -1;
         const maj = () => {
           const p = lirePanier();

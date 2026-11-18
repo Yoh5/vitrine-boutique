@@ -18,7 +18,7 @@ const recherche = [p.nom.fr, p.nom.ar, p.nom.en, code].join(' ').toLowerCase();
     <div class="objet">
       {ph
         ? <img src={`${base}/photos/${ph.fichier}`} alt={nom} width="480" height="480" loading="lazy" decoding="async" />
-        : <div class="sans-photo">{nom}</div>}
+        : <div class="sans-photo">{t.sur_commande}</div>}
     </div>
     <div class="planche" aria-hidden="true"></div>
     <div class="etiquette">

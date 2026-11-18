@@ -1,0 +1,16 @@
+{
+ "planche": {
+  "fichier": "planche.webp",
+  "titre": "File:Wood planks texture.jpg",
+  "auteur": "Titus Tscharntke",
+  "licence": "Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Wood_planks_texture.jpg"
+ },
+ "kraft": {
+  "fichier": "kraft.webp",
+  "titre": "File:Kraft tileable 1024x1024.png",
+  "auteur": "Coyau",
+  "licence": "Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Kraft_tileable_1024x1024.png"
+ }
+}

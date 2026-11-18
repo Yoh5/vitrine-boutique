@@ -9,11 +9,12 @@ export async function getStaticPaths() {
   const tous = await produits();
   const code = codes(tous);
   const z = await zones();
-  return LANGS.flatMap((lang) => tous.map((p) => ({ params: { lang, slug: p.slug }, props: { p, code: code[p.id], zones: z } })));
+  const prix = Object.fromEntries(tous.map((x) => [x.id, Number(x.prix_dh)]));   // pour l'estimation de la barre
+  return LANGS.flatMap((lang) => tous.map((p) => ({ params: { lang, slug: p.slug }, props: { p, code: code[p.id], zones: z, prix } })));
 }
 
 const lang = Astro.params.lang as Lang;
-const { p, code, zones: z } = Astro.props as { p: Produit; code: string; zones: Awaited<ReturnType<typeof zones>> };
+const { p, code, zones: z, prix } = Astro.props as { p: Produit; code: string; zones: Awaited<ReturnType<typeof zones>>; prix: Record<number, number> };
 const t = ui[lang];
 const ph = photo(p.slug);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -23,7 +24,7 @@ const moinsCher = Math.min(...z.map((x) => Number(x.frais_dh)));
 const seuil = Math.min(...z.filter((x) => x.livraison_offerte_des !== null).map((x) => Number(x.livraison_offerte_des)));
 const stockTexte = p.stock === 0 ? t.epuise : p.stock <= SEUIL_RARE ? t.plus_que(p.stock) : t.en_stock;
 ---
-<Boutique lang={lang} titre={`${nom} — ${t.nom}`} description={description || nom} chemin={`produit/${p.slug}/`} barre prix={{ [p.id]: Number(p.prix_dh) }}>
+<Boutique lang={lang} titre={`${nom} — ${t.nom}`} description={description || nom} chemin={`produit/${p.slug}/`} barre actionBarre={false} prix={prix}>
   <main class="page">
     <div class="contenu">
       <a class="retour" href={`${base}/${lang}/#rayon-${p.categorie}`}><Icone nom="retour" />{t.retour}</a>
@@ -31,7 +32,7 @@ const stockTexte = p.stock === 0 ? t.epuise : p.stock <= SEUIL_RARE ? t.plus_que
         <div class="vitrine">
           <div class="objet">
             {ph ? <img src={`${base}/photos/${ph.fichier}`} alt={nom} width="900" height="900" decoding="async" />
-                : <div class="sans-photo">{nom}</div>}
+                : <div class="sans-photo">{t.sur_commande}</div>}
           </div>
           <div class="planche" aria-hidden="true"></div>
         </div>
