@@ -1,0 +1,89 @@
+{
+  "title": "Dar Hdiya — choisir le monde visuel",
+  "question": "Le tirage a désigné « Le hanout ». Le garder, prendre une alternative, ou relancer ?",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Le hanout",
+      "kicker": "THE ROLL",
+      "lineage": "l'épicerie de quartier marocaine",
+      "thesis": "Chaque produit a sa case sur l'étagère et son étiquette en carton ; c'est le comptoir qui fait le compte.",
+      "palette": ["#0F5C6E", "#CDA36B", "#17150F", "#F4F1EA", "#C8102E"],
+      "materials": ["étagère en bois peinte", "étiquettes en carton kraft", "feutre noir", "comptoir et carnet"],
+      "viewport": "L'étagère remplit l'écran : rangées de produits, chacun avec son étiquette manuscrite ; le comptoir en bas tient le panier et son total.",
+      "risk": "Peut faire « bazar » si la grille n'est pas stricte, et l'écriture manuscrite doit rester lisible en arabe.",
+      "raised": [
+        {"from": "challenger-teletext", "raise": "Grille d'étagère stricte : chaque produit occupe exactement la même case, avec un code de case court."},
+        {"from": "challenger-polish-poster", "raise": "Le rouge est réservé à une seule chose à la fois : l'action du moment."},
+        {"from": "challenger-botanical", "raise": "Toutes les photos de produits à la même échelle, sur le même fond."},
+        {"from": "challenger-bbs", "raise": "Le stock est vivant : « plus qu'une pièce » arrive comme un événement."}
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "L'enseigne peinte",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "enseignes de boutiques peintes au pinceau, arabe et français côte à côte",
+      "thesis": "Le site comme une enseigne bilingue peinte à la main.",
+      "palette": ["#1D3F8F", "#FFFFFF", "#F2C230", "#C8102E"],
+      "materials": ["peinture glycéro sur tôle", "lettrage au pinceau"],
+      "viewport": "Une grande enseigne bilingue en tête, les catégories comme des panneaux peints.",
+      "risk": "La direction la plus attendue pour un commerce marocain ; peut tourner au décor."
+    },
+    {
+      "id": "challenger-teletext", "label": "Télétexte", "verdict": "declined",
+      "lineage": "magazines télétexte", "thesis": "Le catalogue comme un index de pages numérotées.",
+      "palette": ["#000000", "#FFFF00", "#00FFFF", "#FFFFFF"], "materials": ["mosaïque de blocs", "grille de caractères"],
+      "viewport": "Page 100 : les catégories en lignes numérotées.", "risk": "Effet rétro-gadget.",
+      "case": "Aucun commerçant marocain ne s'y reconnaît ; la boutique devient un jeu.",
+      "kept": "La discipline de la grille stricte."
+    },
+    {
+      "id": "challenger-bbs", "label": "Babillard ANSI", "verdict": "declined",
+      "lineage": "BBS des années 90", "thesis": "La boutique en écrans de texte.",
+      "palette": ["#000000", "#00AAAA", "#AA00AA", "#FFFFFF"], "materials": ["glyphes en blocs", "terminal"],
+      "viewport": "Écran-titre en art ANSI.", "risk": "Illisible pour un commerçant.",
+      "case": "Perd sur les deux axes.", "kept": "La présence rare traitée comme un événement (le stock)."
+    },
+    {
+      "id": "challenger-botanical", "label": "Folio botanique", "verdict": "declined",
+      "lineage": "planches botaniques", "thesis": "Chaque produit comme une planche.",
+      "palette": ["#F3EBDD", "#2F5D3A", "#B3261E"], "materials": ["papier crème", "filets sépia"],
+      "viewport": "Planches alignées à la même échelle.", "risk": "Retombe dans le crème + serif par défaut.",
+      "case": "Élégant mais sans lien avec le commerce marocain.", "kept": "Même échelle, même fond pour chaque produit."
+    },
+    {
+      "id": "challenger-polish-poster", "label": "Affiche polonaise", "verdict": "declined",
+      "lineage": "affiches de cinéma polonaises", "thesis": "Une image-métaphore par page.",
+      "palette": ["#5B2A6E", "#B3001B", "#A8853A"], "materials": ["gouache", "lettrage peint"],
+      "viewport": "Une métaphore peinte avale l'écran.", "risk": "Cache l'offre et l'action.",
+      "case": "Perd la clarté d'une boutique.", "kept": "Le rouge le plus chaud réservé à l'élément en jeu."
+    },
+    {
+      "id": "challenger-neon", "label": "Néon courbé main", "verdict": "declined",
+      "lineage": "enseignes néon", "thesis": "Le parcours d'achat comme un tube continu.",
+      "palette": ["#0B0B12", "#3355FF", "#D9381E"], "materials": ["verre courbé", "lueur de gaz"],
+      "viewport": "Un mot en néon s'allume.", "risk": "Nuit noire, peu d'information.",
+      "case": "Spectaculaire mais flou sur ce qu'on achète.", "kept": "Un seul trait continu du panier à la livraison."
+    },
+    {
+      "id": "challenger-cloud", "label": "Bord de nuage irisé", "verdict": "declined",
+      "lineage": "nuages iridescents", "thesis": "Le blanc calme, la couleur aux bords.",
+      "palette": ["#FFFFFF", "#475569", "#A7F3D0", "#C4B5FD"], "materials": ["blanc nuage", "franges pastel"],
+      "viewport": "Champ blanc, couleur en filets.", "risk": "Froid, sans rapport avec le cadeau.",
+      "case": "Perd sur les deux axes.", "kept": "La couleur confinée aux bords, le texte reste neutre."
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "buildPath": {"value": "code", "toggle": false},
+  "canon": true,
+  "canonCard": {
+    "label": "La boutique standard",
+    "thesis": "Ce que livre la catégorie, exécuté impeccablement.",
+    "palette": ["#FFFFFF", "#111111", "#8E1B2E"],
+    "materials": ["grille propre", "photos produits"],
+    "viewport": "Bandeau, grille de produits, panier latéral.",
+    "risk": "Indiscernable d'un thème Shopify."
+  },
+  "steer": true
+}

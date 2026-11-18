@@ -156,6 +156,30 @@ do $$ declare r jsonb; s jsonb; begin
   perform pg_temp.egal(suivre_commande('DH-000000-00000', '0698765432'), null::jsonb, 'numéro inconnu');
 end $$;
 
+\echo '11. Aperçu du comptoir : même calcul, rien d''écrit'
+do $$ declare a jsonb; c jsonb; s_avant int; begin
+  s_avant := (select stock from produits where id = 10);
+  a := apercu_commande('[{"produit_id":10,"quantite":1},{"produit_id":12,"quantite":1}]', 1, 'bienvenue10');
+  perform pg_temp.egal((select stock from produits where id = 10), s_avant, 'stock après aperçu');
+  c := pg_temp.cmd('[{"produit_id":10,"quantite":1},{"produit_id":12,"quantite":1}]', 1, 'bienvenue10');
+  perform pg_temp.egal(a->>'total', c->>'total', 'total aperçu = total commande');
+  perform pg_temp.egal(a->>'frais', c->>'frais', 'frais aperçu = frais commande');
+  perform pg_temp.egal(jsonb_array_length(a->'lignes'), 2, 'lignes de l''aperçu');
+  perform pg_temp.doit_echouer($q$select apercu_commande('[{"produit_id":1,"quantite":1}]', 1, 'ETE2026')$q$,
+                               'code_expire');
+  perform pg_temp.doit_echouer($q$select apercu_commande('[{"produit_id":24,"quantite":5}]', 1, null)$q$,
+                               'stock_insuffisant');
+  perform pg_temp.doit_echouer(
+    $q$select calculer_commande('[{"produit_id":1,"quantite":1}]', 1, null, true)$q$,
+    'permission denied for function calculer_commande');
+end $$;
+reset role;
+do $$ begin
+  -- l'aperçu n'a créé aucune commande : chaque commande des tests vient de passer_commande
+  perform pg_temp.egal((select count(*) from commandes where total = 389), 2::bigint,
+                       'commandes à 389 DH (test 4 + test 11, pas l''aperçu)');
+end $$;
+
 reset role;
 rollback;
 \echo 'Tous les tests passent.'
