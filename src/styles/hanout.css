@@ -114,10 +114,10 @@ html { scrollbar-color: var(--bois) var(--mur); }
 
 /* ---------------------------------------------------------------- étagère */
 .etagere { background: var(--etagere); color: var(--blanc); padding-block: 0.5rem 2.5rem; flex: 1; }
-.rayon { padding-block-start: 1.1rem; scroll-margin-top: 1rem; }
+.rayon { padding-block-start: 0.6rem; scroll-margin-top: 1rem; }
 @media (min-width: 640px) { .rayon { padding-block-start: 1.75rem; } }
 .rayon h2 {
-  margin: 0 0 1rem; display: flex; align-items: baseline; gap: 0.6rem;
+  margin: 0 0 0.7rem; display: flex; align-items: baseline; gap: 0.6rem;
   font-family: var(--f-titre); font-weight: 800; font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.1rem); line-height: 1.1;
 }
 :root:not([lang='ar']) .rayon h2 { font-stretch: 118%; text-transform: uppercase; letter-spacing: 0.01em; }
@@ -129,8 +129,10 @@ html { scrollbar-color: var(--bois) var(--mur); }
 
 .planches {
   list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 0; row-gap: 2.6rem;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 0; row-gap: 1.4rem;
 }
+/* Mobile : rangées resserrées pour que l'étagère, pas l'outillage, remplisse le premier écran. */
+@media (min-width: 640px) { .rayon h2 { margin-block-end: 1rem; } .planches { row-gap: 2.6rem; } }
 @media (min-width: 640px) { .planches { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 960px) { .planches { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1280px) { .planches { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
@@ -311,7 +313,10 @@ html { scrollbar-color: var(--bois) var(--mur); }
 .carnet .ligne-nom { font-weight: 700; }
 .carnet .ligne-montant { font-weight: 700; text-align: end; }
 .carnet .ligne-outils { grid-column: 1 / -1; display: flex; gap: 0.5rem; align-items: center; height: 2.75rem; font-family: var(--f-texte); font-size: 0.9rem; line-height: 1.2; }
-.carnet .ligne-nom { line-height: 1.3; padding-block: calc((2.75rem - 1.3em) / 2); }
+.carnet .ligne-nom { line-height: 2.75rem; }
+/* L'écriture repose SUR la réglure (pas centrée entre deux) ; chaque ligne d'un nom long reste
+   calée sur 2,75rem, donc tout ce qui suit garde le rythme du carnet. */
+.carnet .ligne-nom, .carnet .ligne-montant, .carnet h2, .carnet > p, .carnet .totaux div { position: relative; top: 0.55rem; }
 .carnet .ligne-outils .quantite { border-width: 1px; }
 .carnet .ligne-outils .quantite button { width: 44px; height: calc(2.75rem - 2px); }
 .carnet .ligne-outils .retirer { min-height: 44px; border: 0; background: none; color: var(--encre-douce); text-decoration: underline; cursor: pointer; }
@@ -327,12 +332,18 @@ html { scrollbar-color: var(--bois) var(--mur); }
   opacity: 0; transition: opacity 250ms var(--ease);
 }
 .carnet .tampon.visible { opacity: 1; }
+@media (max-width: 379px) { .carnet .tampon { font-size: 0.62rem; inset-inline-end: 0.4rem; inset-block-start: 0.35rem; } }
 
 .formulaire { display: grid; gap: 1.1rem; }
-.formulaire fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.formulaire fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 1rem; min-width: 0; }
+/* Un fieldset et un élément de grille prennent la largeur de leur plus long contenu (min-content) :
+   la liste des villes élargissait le comptoir au-delà d'un écran de 320 px. */
+.comptoir > * { min-width: 0; }
+.formulaire, .formulaire fieldset, .champ { grid-template-columns: minmax(0, 1fr); }
+.formulaire select { max-width: 100%; min-width: 0; }
 .formulaire legend { font-family: var(--f-titre); font-weight: 800; font-size: 1.3rem; margin-block-end: 0.5rem; padding: 0; }
 :root:not([lang='ar']) .formulaire legend { font-stretch: 115%; text-transform: uppercase; }
-.champ { display: grid; gap: 0.3rem; }
+.champ { display: grid; gap: 0.3rem; min-width: 0; }
 .champ label { font-weight: 700; }
 .champ .aide { font-size: 0.875rem; color: var(--encre-douce); }
 .champ input, .champ select, .champ textarea {

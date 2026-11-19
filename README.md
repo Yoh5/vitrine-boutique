@@ -75,8 +75,9 @@ quotidien), et un carnet ligné au comptoir. Un seul rouge, pour une seule actio
 
 ## Limites, dites franchement
 
-- Les deux huiles d'argan utilisent deux recadrages de la même photo : aucune autre photo libre de
-  droits sans marque n'a été trouvée.
+- Une seule huile d'argan en rayon : la seule autre photo libre de droits sans marque montrait le même
+  flacon. Le 50 ml reste en base, **retiré de la vente** (`actif = false`) : c'est aussi la démonstration
+  qu'un produit retiré disparaît de la boutique sans casser les commandes passées.
 - Pas d'espace administrateur : c'est la démonstration suivante (tableau de bord du commerçant, même base).
 - Le paiement par carte n'est pas branché, volontairement.
 

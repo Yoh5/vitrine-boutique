@@ -36,7 +36,7 @@ set role anon;
 
 \echo '1. Le visiteur lit le catalogue, rien d''autre'
 do $$ begin
-  perform pg_temp.egal((select count(*) from produits), 24::bigint, 'produits visibles');
+  perform pg_temp.egal((select count(*) from produits), 23::bigint, 'produits visibles (l''huile 50 ml est retirée)');
   perform pg_temp.egal((select count(*) from zones), 7::bigint, 'zones visibles');
   perform pg_temp.doit_echouer('select * from promos', 'permission denied for table promos');
   perform pg_temp.doit_echouer('select * from commandes', 'permission denied for table commandes');
@@ -122,7 +122,7 @@ reset role;
 update produits set actif = false where id = 23;
 set role anon;
 do $$ begin
-  perform pg_temp.egal((select count(*) from produits), 23::bigint, 'produit retiré invisible');
+  perform pg_temp.egal((select count(*) from produits), 22::bigint, 'produit retiré invisible');
   perform pg_temp.doit_echouer($q$select pg_temp.cmd('[{"produit_id":23,"quantite":1}]')$q$, 'produit_indisponible');
 end $$;
 

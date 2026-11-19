@@ -41,6 +41,10 @@ insert into zones (ville, nom, frais_dh, delai, livraison_offerte_des) values
 ('agadir',     '{"fr":"Agadir","ar":"أكادير","en":"Agadir"}',                 40, '2 à 3 jours', 600),
 ('autres',     '{"fr":"Autres villes","ar":"مدن أخرى","en":"Other cities"}',  45, '3 à 5 jours', null);
 
+-- Retirée de la vente : la photo libre disponible doublait celle du 100 ml. Elle reste en base
+-- (identifiants stables, commandes passées intactes) mais n'apparaît plus dans la boutique.
+update produits set actif = false where slug = 'huile-argan-50';
+
 insert into promos (code, type, valeur, minimum_dh, fin) values
 ('BIENVENUE10', 'pourcent', 10, 0,   null),
 ('AID50',       'montant',  50, 300, null),

@@ -28,7 +28,7 @@ Consultée surtout sur mobile, depuis un lien dans un devis. Maroc : commande co
 
 ## Capabilities and Constraints
 
-- 24 produits, 5 catégories (soins, thé, poterie, textile, coffrets) ; 7 zones de livraison ; 3 codes promo dont un expiré pour montrer le refus.
+- 24 produits en base dont 23 en vente (un retiré, pour montrer le cas), 5 catégories (soins, thé, poterie, textile, coffrets) ; 7 zones de livraison ; 3 codes promo dont un expiré pour montrer le refus.
 - Paiement à la livraison seulement ; le paiement par carte exige un compte marchand au nom du commerçant (CMI, YouCan Pay…) : présent dans l'interface mais marqué « sur un vrai projet ».
 - Pas de comptes clients ; pas d'espace administrateur (projet suivant : tableau de bord du commerçant, même base).
 - Français, arabe (droite à gauche), anglais.
