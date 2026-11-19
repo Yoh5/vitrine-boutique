@@ -7,16 +7,22 @@ body.arriere { background: var(--mur); }
 /* ---------------------------------------------------------------- enseigne et onglets */
 .enseigne-arriere { border-block-end: 0; }
 .enseigne-arriere > .contenu { padding-block: 0.55rem; }
-.enseigne-arriere .marque { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; text-decoration: none; color: var(--blanc); }
+.enseigne-arriere .marque { display: flex; align-items: baseline; gap: 0 0.6rem; flex-wrap: wrap; flex: none; text-decoration: none; color: var(--blanc); }
+.enseigne-arriere .marque > span { white-space: nowrap; }
+/* l'enseigne ne cède jamais : c'est le nom du compte qui se raccourcit, puis s'efface (compte démo) */
+.enseigne-arriere > .contenu { gap: 0.5rem; }
+.compte { min-width: 0; }
 .enseigne-arriere .marque .latin { font-size: 1.25rem; }
 .arriere-titre { font-family: var(--f-main); font-weight: 700; font-size: 1.15rem; color: var(--kraft-clair); }
 .compte { display: flex; align-items: center; gap: 0.5rem; }
-.compte .qui { display: none; font-size: 0.9rem; color: var(--mur); }
+.compte .qui { display: inline-flex; align-items: center; min-width: 0; max-width: 6.5rem; font-size: 0.9rem; color: var(--mur); }
+.compte .qui > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .role-demo {
   margin-inline-start: 0.4rem; padding: 0.05rem 0.45rem; border-radius: 3px;
   background: var(--kraft-clair); color: var(--encre); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
 }
-@media (min-width: 640px) { .compte .qui { display: inline; } }
+@media (min-width: 640px) { .compte .qui { max-width: none; } }
+@media (max-width: 479px) { :root[data-role='demo'] #compte-nom { display: none; } :root[data-role='demo'] .role-demo { margin-inline-start: 0; } }
 .sortir {
   display: inline-flex; align-items: center; gap: 0.35rem; min-height: 44px; padding-inline: 0.7rem;
   border: 0; border-radius: var(--r); background: transparent; color: var(--blanc); font-weight: 700; cursor: pointer;
@@ -26,7 +32,7 @@ body.arriere { background: var(--mur); }
 .onglets { background: var(--etagere); border-block-end: 6px solid var(--bois); }
 .onglets .contenu { display: flex; justify-content: flex-start; gap: 0.4rem; overflow-x: auto; padding-block: 0.5rem; scrollbar-width: none; }
 .onglets a {
-  flex: none; display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding-inline: 0.9rem;
+  flex: none; display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding-inline: 0.7rem;
   border-radius: var(--r); background: var(--etagere-fonce); color: var(--mur-clair); font-weight: 700; text-decoration: none;
   transition: background 200ms var(--ease), color 200ms var(--ease);
 }
@@ -35,7 +41,14 @@ body.arriere { background: var(--mur); }
 .onglets :focus-visible { outline-color: var(--kraft-clair); }
 .compteur {
   min-width: 1.5rem; height: 1.5rem; padding-inline: 0.35rem; border-radius: 0.75rem; display: inline-grid; place-items: center;
-  background: var(--rouge); color: var(--blanc); font-size: 0.8rem; font-weight: 800;
+  background: var(--kraft-clair); color: var(--encre); font-size: 0.8rem; font-weight: 800;
+}
+.onglets a[aria-current='page'] .compteur { background: var(--encre); color: var(--kraft-clair); }
+/* 360–420 px : les trois onglets tiennent sans défiler, les icônes s'effacent */
+@media (max-width: 420px) {
+  .onglets .contenu { gap: 0.3rem; }
+  .onglets a { padding-inline: 0.6rem; gap: 0.35rem; }
+  .onglets a .ico, .onglets a > svg { display: none; }
 }
 
 .avis-demo { margin: 0; background: var(--kraft-clair); color: var(--encre); font-size: 0.9rem; padding-block: 0.55rem; }
@@ -83,8 +96,9 @@ body.arriere { background: var(--mur); }
 .bandeau {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   margin-block-end: 1.25rem; padding: 0.9rem 1rem; border-radius: var(--r);
-  background: var(--bois-fonce); color: var(--blanc); border-block-start: 4px solid var(--bois-clair);
-  box-shadow: var(--ombre);
+  /* la planche de l'étagère (photo réelle) multipliée par le bois foncé, comme les planches de la boutique */
+  background: var(--bois-fonce) url('/textures/planche.webp') left center / auto 100% repeat-x; background-blend-mode: multiply;
+  color: var(--blanc); box-shadow: 0 6px 8px -4px rgb(0 0 0 / 0.45), var(--ombre);
 }
 .bandeau p { margin: 0; }
 .bandeau-titre { font-family: var(--f-titre); font-weight: 800; font-stretch: 112%; font-size: 1.3rem; line-height: 1.15; }
@@ -93,12 +107,12 @@ body.arriere { background: var(--mur); }
 .bandeau :focus-visible { outline-color: var(--kraft-clair); }
 
 /* ---------------------------------------------------------------- la réserve */
-.reserve { display: grid; gap: 1.75rem; align-items: start; }
+.reserve { display: grid; gap: 1.75rem; align-items: start; grid-template-areas: 'alertes' 'rayons' 'semaine'; }
+.zone-alertes { grid-area: alertes; } .zone-rayons { grid-area: rayons; } .zone-semaine { grid-area: semaine; }
 @media (min-width: 960px) {
-  .reserve { grid-template-columns: minmax(0, 23rem) minmax(0, 1fr); gap: 2.5rem; }
-  .col-alertes { position: sticky; top: 1rem; }
+  .reserve { grid-template-columns: minmax(0, 23rem) minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 1.75rem 2.5rem;
+             grid-template-areas: 'alertes rayons' 'semaine rayons'; }
 }
-.col-alertes { display: grid; gap: 1.75rem; }
 .col-rayons { display: grid; gap: 1.75rem; }
 .bloc { min-width: 0; }
 
@@ -114,18 +128,19 @@ body.arriere { background: var(--mur); }
 
 .lignes { container-type: inline-size; list-style: none; margin: 0; padding: 0; background: var(--mur-clair); border-radius: var(--r); box-shadow: var(--ombre); }
 .ligne {
-  display: grid; align-items: center; column-gap: 0.75rem; row-gap: 0.15rem;
-  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
-  grid-template-areas: 'vig des compte' 'vig etat corr';
-  padding: 0.6rem 0.75rem; border-block-end: 1px solid #d7dfdc;
+  display: grid; align-items: center; column-gap: 0.6rem; row-gap: 0.15rem;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto auto;
+  grid-template-areas: 'vig des compte corr';
+  padding: 0.55rem 0.6rem 0.55rem 0.75rem; border-block-end: 1px solid #d7dfdc;
 }
 .ligne:last-child { border-block-end: 0; }
 .vignette { grid-area: vig; width: 3.5rem; height: 3.5rem; object-fit: cover; border-radius: 3px; background: var(--mur); }
-.vignette-vide { display: block; background: var(--etagere-fonce); box-shadow: inset 0 6px 10px rgb(0 0 0 / 0.35); }
+.vignette-vide { display: block; background: var(--etagere-fonce); box-shadow: inset 0 6px 10px rgb(0 0 0 / 0.35); outline: 1.5px dashed var(--kraft); outline-offset: -5px; }
 .designation { grid-area: des; display: grid; min-width: 0; }
 .designation .code { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; color: var(--encre-douce); }
 .designation .nom { font-weight: 700; line-height: 1.25; }
 .designation .ventes { font-size: 0.8rem; color: var(--encre-douce); }
+.designation .ventes > span { white-space: nowrap; }
 .compte-stock { grid-area: compte; display: flex; align-items: baseline; justify-content: flex-end; gap: 0.45rem; position: relative; }
 .chiffre { font-weight: 700; font-size: 2rem; line-height: 1; min-width: 2.2ch; text-align: end; }
 .ancien { font-family: var(--f-main); font-size: 1.2rem; color: var(--encre-douce); text-decoration-color: var(--rouge); text-decoration-thickness: 2px; }
@@ -137,15 +152,16 @@ body.arriere { background: var(--mur); }
   white-space: nowrap; animation: tamponner 400ms var(--ease) both;
 }
 @keyframes tamponner { from { opacity: 0; scale: 1.4; } to { opacity: 1; scale: 1; } }
-.etat-place { grid-area: etat; min-width: 0; }
+.etat-place:empty { display: none; }
+.etat-place { margin-block: 0.15rem; }
 .etat { display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
 .etat-rupture { color: #b42318; border: 2px solid #b42318; padding: 0.05rem 0.4rem; border-radius: 3px; rotate: -2deg; }
 .etat-bas { color: var(--rouge-fonce); }
 .etat-retire { color: var(--encre-douce); border: 1.5px dashed var(--encre-douce); padding: 0.05rem 0.4rem; border-radius: 3px; }
-.ligne-retiree .vignette { filter: grayscale(1); opacity: 0.6; }
+.ligne-retiree img.vignette { filter: grayscale(1); opacity: 0.6; }
 .ligne-retiree .chiffre { color: var(--encre-douce); }
 .corriger {
-  grid-area: corr; justify-self: end; display: inline-flex; align-items: center; gap: 0.3rem; min-height: 40px; padding-inline: 0.6rem;
+  grid-area: corr; justify-self: end; display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem; min-height: 44px; min-width: 44px; padding-inline: 0.6rem;
   border: 1.5px solid var(--encre-douce); border-radius: var(--r); background: transparent; color: var(--encre); font-weight: 700; font-size: 0.9rem; cursor: pointer;
 }
 .corriger:hover, .corriger[aria-expanded='true'] { background: var(--encre); border-color: var(--encre); color: var(--blanc); }
@@ -167,9 +183,10 @@ body.arriere { background: var(--mur); }
 .form-correction .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
 .form-correction .vente { margin-inline-start: auto; color: var(--encre-douce); font-size: 0.9rem; }
 /* La ligne s'étale selon la place de SA liste (colonne étroite « à surveiller » ou rayon large). */
-@container (min-width: 34rem) {
-  .ligne { grid-template-columns: 3.5rem minmax(0, 1fr) 7.5rem 7rem auto; grid-template-areas: 'vig des etat compte corr'; }
-  .etat-place { justify-self: start; }
+/* liste étroite (téléphone, colonne « à surveiller ») : le bouton garde son icône seule */
+@container (max-width: 30rem) {
+  .corriger-texte { display: none; }
+  .corriger { padding-inline: 0; }
 }
 
 /* ---------------------------------------------------------------- les 7 jours : une page du carnet */
@@ -235,7 +252,7 @@ body.arriere { background: var(--mur); }
   display: inline-block; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.72rem; font-weight: 800;
   letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; border: 1.5px solid currentColor;
 }
-.s-recue { color: var(--rouge-fonce); background: #fdeced; }
+.s-recue { color: var(--encre); background: var(--kraft-clair); }
 .s-confirmee { color: var(--etagere); background: #e1eef1; }
 .s-expediee { color: var(--bois-fonce); background: #f5ead9; }
 .s-livree { color: var(--succes); background: #e3f1e9; }
@@ -269,7 +286,7 @@ body.arriere { background: var(--mur); }
 .total-bon { border-block-start: 2px solid var(--encre); font-weight: 700; font-size: 1.55rem; }
 .paiement { margin: 0.25rem 0 0; font-size: 0.9rem; color: var(--encre-douce); }
 .actions-bon { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin-block-start: 1.1rem; }
-.actions-bon .annuler { color: #b42318; margin-inline-start: auto; }
+.actions-bon .annuler { color: var(--encre); margin-inline-start: auto; }
 .fin-circuit { margin: 1rem 0 0; font-weight: 700; color: var(--encre-douce); }
 .annulation { display: grid; gap: 0.5rem; margin-block-start: 0.9rem; padding: 0.8rem; border: 2px solid #e5a49b; border-radius: var(--r); background: #fdf3f1; }
 .annulation label { font-weight: 700; }
@@ -286,22 +303,26 @@ body.arriere { background: var(--mur); }
 .page-journal { max-width: 52rem; }
 .intro-journal { color: var(--encre-douce); max-width: 60ch; margin: 0.4rem 0 1.25rem; }
 .registre-journal {
-  list-style: none; margin: 0; padding: 0 1rem 0 1.6rem; border-radius: 4px; box-shadow: var(--ombre); background-color: var(--blanc);
-  background-image: linear-gradient(to right, transparent 0.6rem, #e8a3a3 0.6rem calc(0.6rem + 1px), transparent calc(0.6rem + 1px));
+  list-style: none; margin: 0; padding: 0 1rem 2.75rem 1.6rem; border-radius: 4px; box-shadow: var(--ombre); background-color: var(--blanc);
+  background-image:
+    linear-gradient(to right, transparent 0.6rem, #e8a3a3 0.6rem calc(0.6rem + 1px), transparent calc(0.6rem + 1px)),
+    repeating-linear-gradient(transparent 0 calc(2.75rem - 1px), var(--regle) calc(2.75rem - 1px) 2.75rem);
 }
+/* chaque ligne d'écriture vaut une réglure (2,75rem) et repose dessus, comme dans le carnet du comptoir */
 .entree {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'quoi qui' 'quand motif';
-  gap: 0.15rem 0.75rem; padding-block: 0.65rem; border-block-end: 1px solid var(--regle);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'quoi quoi' 'quand qui' 'motif motif';
+  column-gap: 0.75rem; line-height: 2.75rem;
 }
-.entree:last-child { border-block-end: 0; }
+.entree > * { position: relative; top: 0.55rem; line-height: inherit; }
 .entree .quand { grid-area: quand; font-size: 0.85rem; color: var(--encre-douce); }
 .entree .qui { grid-area: qui; font-size: 0.85rem; font-weight: 700; justify-self: end; }
 .entree .quoi { grid-area: quoi; min-width: 0; }
 .entree .quoi s { font-family: var(--f-main); color: var(--encre-douce); text-decoration-color: var(--rouge); text-decoration-thickness: 2px; }
 .entree .quoi .main { font-size: 1.2rem; }
-.entree .motif { grid-area: motif; justify-self: end; font-size: 0.95rem; }
+.entree .motif { grid-area: motif; justify-self: start; font-size: 0.95rem; }
 @media (min-width: 720px) {
-  .entree { grid-template-columns: 9.5rem minmax(0, 1fr) auto 10rem; grid-template-areas: 'quand quoi motif qui'; align-items: baseline; }
+  .entree { grid-template-columns: 9.5rem minmax(0, 1fr) 9rem; grid-template-areas: 'quand quoi qui' '. motif .'; align-items: baseline; }
+  .entree .motif { justify-self: start; }
 }
 
 /* ---------------------------------------------------------------- connexion : la porte de la réserve */

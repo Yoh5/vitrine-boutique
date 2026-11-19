@@ -1,6 +1,6 @@
--- Commandes de DÉMONSTRATION pour l'espace du gérant : noms fictifs, sur les 7 derniers jours.
+-- Commandes de DÉMONSTRATION pour l'espace du gérant : 10 commandes, noms fictifs, sur les 7 derniers jours.
 -- Passées par passer_commande() (prix, frais et stock calculés par la base), puis datées et avancées
--- dans le circuit pour montrer chaque statut. Aucune n'est une vraie vente.
+-- dans le circuit pour montrer chaque statut (et une rupture : le coffret de l'Aïd). Aucune n'est une vraie vente.
 do $$
 declare
   c record;
@@ -15,6 +15,8 @@ begin
     (2, 9,  '[{"produit_id":21,"quantite":1},{"produit_id":5,"quantite":2}]', 4, 'AID50', 'Samira Idrissi', '0699001122', '18 rue de la Liberté, Tanger', 'expediee'),
     (1, 14, '[{"produit_id":3,"quantite":3},{"produit_id":4,"quantite":1}]', 1, null, 'Mehdi Tazi', '0623456789', '9 rue Ibnou Mounir, Maârif, Casablanca', 'expediee'),
     (1, 20, '[{"produit_id":15,"quantite":1}]', 6, null, 'Zineb Ouazzani', '0645678901', '12 avenue Hassan Ier, Agadir', 'confirmee'),
+    -- la dernière pièce du coffret de l'Aïd part : la réserve montre une rupture
+    (1, 17, '[{"produit_id":24,"quantite":1}]', 1, null, 'Ilham Sebti', '0688776655', '14 rue Jean Jaurès, Gauthier, Casablanca', 'confirmee'),
     (0, 8,  '[{"produit_id":10,"quantite":1},{"produit_id":6,"quantite":2}]', 1, null, 'Karim Bennis', '0634567812', '5 rue Moulay Youssef, Casablanca', 'recue'),
     (0, 11, '[{"produit_id":19,"quantite":1},{"produit_id":11,"quantite":3}]', 7, null, 'Nawal Berrada', '0678123456', '27 hay Al Qods, Béni Mellal', 'recue')
   ) v(jours, heure, panier, zone, code, nom, tel, adresse, statut)

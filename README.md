@@ -37,6 +37,49 @@ ignorée, verrou retiré) : chaque fois, un test échoue. Ils tournent aussi sou
 de Supabase** (`db/supabase_defauts.sql`), qui accordent tout à `anon` et `authenticated` : le schéma
 les retire explicitement.
 
+## Espace du gérant (`/gerant/`) — démonstration n°6
+
+Le tableau de bord du commerçant, **sur la même base** : une commande passée dans la boutique apparaît
+dans l'arrière-boutique. L'écran principal est la **réserve** (ce qui manque en rayon d'abord), avec en
+tête les commandes à traiter et le chiffre du jour.
+
+| Ce que le commerçant fait | Ce que la base garantit |
+|---|---|
+| Corriger un stock (motif obligatoire) | refusé si une vente est passée entre l'affichage et l'envoi : on ne l'écrase pas |
+| Confirmer, expédier, livrer une commande | seules les étapes prévues sont acceptées (reçue → confirmée → expédiée → livrée) |
+| Annuler une commande (motif obligatoire) | possible tant que rien n'est parti ; le stock revient en rayon, une seule fois |
+| Retirer un produit de la vente | il disparaît de la boutique, les commandes passées restent intactes |
+| Relire le journal | chaque geste y est écrit par la base : qui, quoi, avant, après |
+| Exporter les commandes (CSV) | — |
+
+**Compte de démonstration** : un prospect peut entrer d'un clic. La base lui **masque** les noms,
+téléphones et adresses des clients (« Salma B. », « 06 •• •• •• 78 ») et ne le laisse pas chercher par ces
+données. Un compte Supabase qui n'est pas inscrit comme gérant est refusé partout.
+
+Tests : `db/tests_gerant.sql` (10 groupes) et `python db/muter_gerant.py` (9 défauts injectés, 9 détectés).
+
+### Mettre l'espace du gérant en ligne (projet Supabase déjà installé)
+
+1. `bash db/preparer_supabase.sh`, puis coller `db/supabase_gerant.sql` dans l'éditeur SQL de Supabase.
+2. **Authentication → Sign In / Providers** : désactiver « Allow new users to sign up ».
+3. **Authentication → Users → Add user** (cocher « Auto Confirm User ») : le compte du gérant, puis le
+   compte de démonstration (son mot de passe sera public).
+4. Les déclarer comme gérants, dans l'éditeur SQL :
+   ```sql
+   insert into gerants (user_id, nom, role)
+   select id, 'Karima', 'gerant' from auth.users where email = '<e-mail du gérant>';
+   insert into gerants (user_id, nom, role)
+   select id, 'Visiteur démo', 'demo' from auth.users where email = '<e-mail du compte démo>';
+   ```
+5. Facultatif : **Integrations → Cron** (pg_cron), puis relancer `db/supabase_gerant.sql` pour programmer
+   la remise à zéro nocturne de la réserve. Facultatif aussi : `db/commandes_demo.sql` (9 commandes fictives
+   sur 7 jours, pour que le tableau de bord ait de quoi montrer).
+6. Variables du site : `PUBLIC_DEMO_EMAIL` et `PUBLIC_DEMO_MOT_DE_PASSE` (bouton « Entrer avec le compte démo »).
+
+En local : `bash db/lancer_tests.sh`, `bash db/api_locale.sh`, puis `db/gerant_local.sql` et
+`db/commandes_demo.sql` ; `python db/jeton_local.py gerant` donne une session à mettre dans le navigateur
+(`localStorage["darhdiya:session"]`), l'API locale n'ayant pas de service de connexion.
+
 ## Lancer en local
 
 Il faut Docker et Node.
@@ -80,7 +123,7 @@ quotidien), et un carnet ligné au comptoir. Un seul rouge, pour une seule actio
 - Une seule huile d'argan en rayon : la seule autre photo libre de droits sans marque montrait le même
   flacon. Le 50 ml reste en base, **retiré de la vente** (`actif = false`) : c'est aussi la démonstration
   qu'un produit retiré disparaît de la boutique sans casser les commandes passées.
-- Pas d'espace administrateur : c'est la démonstration suivante (tableau de bord du commerçant, même base).
+- L'espace du gérant est en français seulement (la boutique est en trois langues).
 - Le paiement par carte n'est pas branché, volontairement.
 
 ## Crédits

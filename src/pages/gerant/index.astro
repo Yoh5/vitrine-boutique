@@ -16,19 +16,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   <p class="erreur-page" id="erreur" role="alert" hidden></p>
 
   <div class="reserve" id="reserve" aria-busy="true">
-    <aside class="col-alertes">
-      <section class="bloc">
+      <section class="bloc zone-alertes">
         <h2 class="titre-bloc">À surveiller</h2>
         <ul class="lignes" id="alertes"></ul>
         <p class="calme" id="alertes-vide" hidden>Aucune rupture, aucun stock bas. La réserve est pleine.</p>
       </section>
-      <section class="bloc semaine">
+      <section class="bloc semaine zone-semaine">
         <h2 class="titre-bloc">Les 7 derniers jours</h2>
         <ol class="registre" id="semaine"></ol>
         <p class="note">Commandes annulées non comptées. Heure de Casablanca.</p>
       </section>
-    </aside>
-    <div class="col-rayons" id="rayons"></div>
+    <div class="col-rayons zone-rayons" id="rayons"></div>
   </div>
 </Gerant>
 
@@ -80,16 +78,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       ph ? h('img', { class: 'vignette', src: `${base}/photos/${ph.fichier}`, alt: '', width: 56, height: 56, loading: 'lazy' })
          : h('span', { class: 'vignette vignette-vide', 'aria-hidden': 'true' }),
       h('div', { class: 'designation' },
-        h('span', { class: 'code nombre' }, codes[p.id] ?? '—'),
+        codes[p.id] ? h('span', { class: 'code nombre' }, codes[p.id]) : null,
         h('span', { class: 'nom' }, insecable(p.nom.fr)),
-        h('span', { class: 'ventes' }, `${pluriel(p.vendus_30j, 'vendu', 'vendus')} en 30 j · ${dh(p.prix)}`)),
+        h('span', { class: 'etat-place' }, etat(p)),
+        h('span', { class: 'ventes' }, h('span', {}, `${pluriel(p.vendus_30j, 'vendu', 'vendus')} en 30 j`), ' · ', h('span', {}, dh(p.prix)))),
       h('div', { class: 'compte-stock' },
         h('s', { class: 'ancien nombre', hidden: true }),
         h('span', { class: 'chiffre nombre', 'aria-label': `Stock : ${p.stock}` }, p.stock),
         h('span', { class: 'tampon-base', hidden: true }, 'compté par la base')),
-      h('div', { class: 'etat-place' }, etat(p)),
-      h('button', { class: 'corriger', type: 'button', 'aria-expanded': 'false', onclick: () => ouvrir(li) },
-        icone(svg('crayon', 16)), 'Corriger'),
+      h('button', { class: 'corriger', type: 'button', 'aria-expanded': 'false', 'aria-label': `Corriger le stock : ${p.nom.fr}`,
+                    onclick: () => ouvrir(li) },
+        icone(svg('crayon', 16)), h('span', { class: 'corriger-texte' }, 'Corriger')),
     );
     return li;
   }
