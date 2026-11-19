@@ -226,6 +226,12 @@ html { scrollbar-color: var(--bois) var(--mur); }
   .comptoir-barre .contenu { width: 100%; }
   .pied { padding-block-end: 8rem; }
 }
+/* Badge « Powered by Netlify » (offre gratuite, ~3 rem en bas à droite) : le comptoir passe au-dessus. */
+.badge-hebergeur .comptoir-barre { padding-block-end: calc(3.4rem + env(safe-area-inset-bottom)); }
+@media (min-width: 1100px) {
+  .badge-hebergeur .comptoir-barre { padding: 0.9rem 1rem; }
+  :root[dir='ltr'].badge-hebergeur .comptoir-barre { inset-block-end: 4.25rem; }
+}
 .comptoir-barre .nb.bump { animation: bump 450ms var(--ease); }
 @keyframes bump { 40% { scale: 1.18; } }
 

@@ -1,5 +1,7 @@
 # Dar Hdiya — boutique en ligne de démonstration
 
+**En ligne : https://dar-hdiya-demo.netlify.app** (base Supabase, offre gratuite)
+
 Cinquième démonstration du portfolio freelance, la première **boutique** : catalogue, panier,
 commande et suivi qui fonctionnent pour de vrai, avec une base de données. **Boutique fictive** :
 aucun produit n'est vendu, aucune commande n'est livrée, et le pied de page le dit.

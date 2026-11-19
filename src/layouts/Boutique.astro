@@ -82,6 +82,8 @@ const lien = (l: Lang) => `${base}/${l}/${chemin}`.replace(/\/+$/, '/') ;
     <script>
       import { lirePanier, surChangement, nbArticles } from '../lib/panier';
       import { ui, dh, type Lang } from '../i18n/ui';
+      // L'offre gratuite de Netlify ajoute son badge en bas à droite : on décale le comptoir au lieu de le masquer.
+      if (document.querySelector('script[data-nf-variant]')) document.documentElement.classList.add('badge-hebergeur');
       const barre = document.querySelector<HTMLElement>('.comptoir-barre');
       if (barre) {
         const lang = barre.dataset.lang as Lang;
