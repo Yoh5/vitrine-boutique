@@ -4,14 +4,18 @@
 -- Il n'écrit rien directement : il appelle passer_commande(), qui recalcule
 -- prix, remise, frais et stock dans une seule transaction.
 
--- Rôle du visiteur anonyme. Sur Supabase il existe déjà ; en local on le crée.
+-- Rôles de Supabase : anon (visiteur) et authenticated (utilisateur connecté ; la boutique n'a pas
+-- de comptes, mais Supabase peut en créer). Sur Supabase ils existent déjà ; en local on les crée.
 do $$ begin
   if not exists (select 1 from pg_roles where rolname = 'anon') then
     create role anon nologin;
   end if;
+  if not exists (select 1 from pg_roles where rolname = 'authenticated') then
+    create role authenticated nologin;
+  end if;
 end $$;
 
-grant usage on schema public to anon;
+grant usage on schema public to anon, authenticated;
 
 -- ---------------------------------------------------------------- tables
 
@@ -79,15 +83,18 @@ alter table promos          enable row level security;
 alter table commandes       enable row level security;
 alter table lignes_commande enable row level security;
 
-revoke all on produits, zones, promos, commandes, lignes_commande from anon;
-grant select on produits, zones to anon;
+-- Supabase accorde par défaut TOUT à anon et authenticated : on retire tout, puis on rend la lecture
+-- du catalogue et des zones. Les séquences aussi (sinon on pourrait faire avancer les numéros).
+revoke all on produits, zones, promos, commandes, lignes_commande from anon, authenticated;
+revoke all on all sequences in schema public from anon, authenticated;
+grant select on produits, zones to anon, authenticated;
 
 drop policy if exists catalogue_visible on produits;
-create policy catalogue_visible on produits for select to anon using (actif);
+create policy catalogue_visible on produits for select to anon, authenticated using (actif);
 
 drop policy if exists zones_visibles on zones;
-create policy zones_visibles on zones for select to anon using (true);
--- promos, commandes, lignes_commande : aucune règle pour anon = aucun accès.
+create policy zones_visibles on zones for select to anon, authenticated using (true);
+-- promos, commandes, lignes_commande : aucun droit et aucune règle = aucun accès.
 
 -- ---------------------------------------------------------------- fonctions
 
@@ -259,11 +266,13 @@ language sql stable security definer set search_path = public, pg_temp as $$
     and c.telephone = normaliser_telephone(p_telephone)
 $$;
 
-revoke all on function passer_commande(jsonb, integer, text, text, text, text) from public;
-revoke all on function suivre_commande(text, text) from public;
-revoke all on function apercu_commande(jsonb, integer, text) from public;
-revoke all on function calculer_commande(jsonb, integer, text, boolean) from public;
-grant execute on function passer_commande(jsonb, integer, text, text, text, text) to anon;
-grant execute on function suivre_commande(text, text) to anon;
-grant execute on function apercu_commande(jsonb, integer, text) to anon;
+-- Supabase accorde aussi EXECUTE sur toute nouvelle fonction à anon et authenticated : on retire tout,
+-- puis on n'ouvre que les trois portes publiques.
+revoke all on function passer_commande(jsonb, integer, text, text, text, text) from public, anon, authenticated;
+revoke all on function suivre_commande(text, text) from public, anon, authenticated;
+revoke all on function apercu_commande(jsonb, integer, text) from public, anon, authenticated;
+revoke all on function calculer_commande(jsonb, integer, text, boolean) from public, anon, authenticated;
+grant execute on function passer_commande(jsonb, integer, text, text, text, text) to anon, authenticated;
+grant execute on function suivre_commande(text, text) to anon, authenticated;
+grant execute on function apercu_commande(jsonb, integer, text) to anon, authenticated;
 -- calculer_commande : aucun droit pour anon (sinon il pourrait verrouiller des produits à volonté).

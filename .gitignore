@@ -7,3 +7,4 @@ dist/
 .impeccable/tmp/
 .playwright-mcp/
 .impeccable/review/
+db/supabase_complet.sql

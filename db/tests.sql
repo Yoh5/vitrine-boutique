@@ -180,6 +180,27 @@ do $$ begin
                        'commandes à 389 DH (test 4 + test 11, pas l''aperçu)');
 end $$;
 
+\echo '12. Utilisateur connecté (authenticated, comme sur Supabase) : pas plus de droits que le visiteur'
+set role authenticated;
+do $$ begin
+  perform pg_temp.egal((select count(*) from produits) > 0, true, 'catalogue visible connecté');
+  perform pg_temp.doit_echouer('select * from promos', 'permission denied for table promos');
+  perform pg_temp.doit_echouer('select * from commandes', 'permission denied for table commandes');
+  perform pg_temp.doit_echouer('delete from commandes', 'permission denied for table commandes');
+  perform pg_temp.doit_echouer('update produits set stock = 999', 'permission denied for table produits');
+  perform pg_temp.doit_echouer($q$select nextval('commandes_id_seq')$q$, 'permission denied for sequence commandes_id_seq');
+  perform pg_temp.doit_echouer(
+    $q$select calculer_commande('[{"produit_id":1,"quantite":1}]', 1, null, true)$q$,
+    'permission denied for function calculer_commande');
+  perform pg_temp.egal((apercu_commande('[{"produit_id":1,"quantite":1}]', 1, null)->>'total')::numeric > 0, true,
+                       'aperçu permis connecté');
+end $$;
+set role anon;
+do $$ begin
+  perform pg_temp.doit_echouer($q$select nextval('commandes_id_seq')$q$, 'permission denied for sequence commandes_id_seq');
+  perform pg_temp.doit_echouer('truncate commandes', 'permission denied for table commandes');
+end $$;
+
 reset role;
 rollback;
 \echo 'Tous les tests passent.'
