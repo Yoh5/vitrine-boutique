@@ -1,0 +1,110 @@
+---
+// Arrière-boutique de Dar Hdiya : gabarit commun (enseigne, onglets, garde de connexion).
+// Rien de privé n'est construit ici : les données arrivent dans le navigateur, après connexion.
+import '../styles/hanout.css';
+import '../styles/gerant.css';
+import Icone from '../components/Icone.astro';
+
+interface Props { titre: string; onglet?: 'reserve' | 'commandes' | 'journal' | null }
+const { titre, onglet = null } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const onglets = [
+  { id: 'reserve', href: `${base}/gerant/`, label: 'Réserve', icone: 'reserve' },
+  { id: 'commandes', href: `${base}/gerant/commandes/`, label: 'Commandes', icone: 'bons' },
+  { id: 'journal', href: `${base}/gerant/journal/`, label: 'Journal', icone: 'journal' },
+] as const;
+---
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{titre} · Arrière-boutique Dar Hdiya</title>
+    <meta name="theme-color" content="#0a4250" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Kalam:wght@400;700&display=swap" />
+  </head>
+  <body class="arriere" data-onglet={onglet ?? ''}>
+    <header class="enseigne enseigne-arriere">
+      <div class="contenu">
+        <a class="marque" href={onglet ? `${base}/gerant/` : `${base}/fr/`}>
+          <span class="latin">Dar Hdiya</span>
+          <span class="arriere-titre">arrière-boutique</span>
+        </a>
+        {onglet && (
+          <div class="compte" id="compte" hidden>
+            <span class="qui"><span id="compte-nom"></span><span class="role-demo" id="compte-demo" hidden>démo</span></span>
+            <button class="sortir" type="button" id="sortir"><Icone nom="sortir" taille={18} /><span>Sortir</span></button>
+          </div>
+        )}
+      </div>
+      {onglet && (
+        <nav class="onglets" aria-label="Sections">
+          <div class="contenu">
+            {onglets.map((o) => (
+              <a href={o.href} aria-current={o.id === onglet ? 'page' : undefined}>
+                <Icone nom={o.icone} taille={18} />{o.label}
+                {o.id === 'commandes' && <span class="compteur nombre" id="compteur-commandes" hidden></span>}
+              </a>
+            ))}
+          </div>
+        </nav>
+      )}
+    </header>
+
+    {onglet && (
+      <p class="avis-demo" id="avis-demo" hidden>
+        <span class="contenu">Compte de démonstration : noms, téléphones et adresses sont masqués par la base.
+        Vos changements sont réels mais la réserve reprend son état chaque nuit.</span>
+      </p>
+    )}
+
+    <main class="contenu arriere-main" id="principal">
+      <slot />
+    </main>
+
+    <footer class="pied-arriere">
+      <div class="contenu">
+        <p>Démonstration : boutique fictive, aucune commande n’est livrée.{' '}
+          <a href={`${base}/fr/`}>Voir la boutique</a></p>
+      </div>
+    </footer>
+
+    {onglet && (
+      <script>
+        import { lireSession, deconnecter, moi, tableau, message, ErreurGerant } from '../lib/gerant';
+        const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+        document.querySelector('.onglets a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        const versConnexion = () => location.replace(`${base}/gerant/connexion/?retour=${encodeURIComponent(location.pathname + location.search)}`);
+        if (!lireSession()) versConnexion();
+        else {
+          moi().then((m) => {
+            document.getElementById('compte-nom')!.textContent = m.nom;
+            document.getElementById('compte')!.hidden = false;
+            const demo = m.role === 'demo';
+            document.getElementById('compte-demo')!.hidden = !demo;
+            document.getElementById('avis-demo')!.hidden = !demo;
+            document.documentElement.dataset.role = m.role;
+          }).catch((e) => {
+            if (e instanceof ErreurGerant && (e.code === 'non_connecte' || e.code === 'acces_refuse')) {
+              if (e.code === 'acces_refuse') deconnecter();
+              versConnexion();
+            } else document.dispatchEvent(new CustomEvent('erreur-arriere', { detail: message(e) }));
+          });
+          tableau().then((t) => {
+            const c = document.getElementById('compteur-commandes')!;
+            c.textContent = String(t.a_traiter);
+            c.hidden = t.a_traiter === 0;
+          }).catch(() => {});
+        }
+        document.getElementById('sortir')?.addEventListener('click', async () => {
+          await deconnecter();
+          location.replace(`${base}/gerant/connexion/`);
+        });
+      </script>
+    )}
+  </body>
+</html>

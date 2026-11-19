@@ -8,5 +8,6 @@ docker network connect darhdiya darhdiya-db 2>/dev/null || true
 docker rm -f darhdiya-api >/dev/null 2>&1 || true
 docker run -d --name darhdiya-api --network darhdiya -p 54321:3000 \
   -e PGRST_DB_URI="postgres://authenticator:demo@darhdiya-db:5432/postgres" \
-  -e PGRST_DB_SCHEMAS=public -e PGRST_DB_ANON_ROLE=anon postgrest/postgrest:latest >/dev/null
+  -e PGRST_DB_SCHEMAS=public -e PGRST_DB_ANON_ROLE=anon \
+  -e PGRST_JWT_SECRET=secret-local-de-developpement-32-caracteres-au-moins postgrest/postgrest:latest >/dev/null
 echo "API sur http://localhost:54321"

@@ -1,0 +1,48 @@
+---
+import Gerant from '../../layouts/Gerant.astro';
+---
+<Gerant titre="Journal" onglet="journal">
+  <div class="page-journal">
+    <h1 class="titre-page">Journal</h1>
+    <p class="intro-journal">Chaque geste dans l’arrière-boutique est écrit ici par la base : qui, quoi, avant, après. Personne ne peut le modifier depuis l’interface.</p>
+    <p class="erreur-page" id="erreur" role="alert" hidden></p>
+    <ol class="registre-journal" id="journal" aria-busy="true"></ol>
+    <p class="calme" id="vide" hidden>Rien d’écrit pour l’instant : aucune commande traitée, aucun stock corrigé.</p>
+  </div>
+</Gerant>
+
+<script>
+  import { journal, stock, message, quand, STATUTS, ErreurGerant, type Statut } from '../../lib/gerant';
+  import { h } from '../../lib/dom';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+  Promise.all([journal(), stock().catch(() => [])]).then(([entrees, produits]) => {
+    const noms = new Map(produits.map((p) => [p.slug, p.nom.fr]));
+    $('journal').replaceChildren(...entrees.map((j) => {
+      let quoi: (Node | string)[];
+      if (j.action === 'statut') {
+        quoi = [
+          h('a', { class: 'nombre', href: `${base}/gerant/commandes/?n=${encodeURIComponent(j.cible)}` }, j.cible), ' : ',
+          STATUTS[j.avant as Statut], ' → ', h('strong', {}, STATUTS[j.apres as Statut])];
+      } else if (j.action === 'stock' && j.cible === 'catalogue') {
+        quoi = [`Remise à zéro de la nuit : ${j.apres} produit${Number(j.apres) > 1 ? 's' : ''} remis à leur stock de référence`];
+      } else if (j.action === 'stock') {
+        quoi = [noms.get(j.cible) ?? j.cible, ' : ', h('s', { class: 'nombre' }, String(j.avant)), ' ', h('strong', { class: 'main nombre' }, String(j.apres))];
+      } else {
+        quoi = [noms.get(j.cible) ?? j.cible, j.apres ? ' : remis en vente' : ' : retiré de la vente'];
+      }
+      return h('li', { class: `entree e-${j.action}` },
+        h('span', { class: 'quand' }, quand(j.quand)),
+        h('span', { class: 'qui' }, j.qui),
+        h('span', { class: 'quoi' }, ...quoi),
+        j.motif ? h('span', { class: 'motif' }, `« ${j.motif} »`) : null);
+    }));
+    $('vide').hidden = entrees.length > 0;
+    $('journal').setAttribute('aria-busy', 'false');
+  }).catch((e) => {
+    if (e instanceof ErreurGerant && e.code === 'non_connecte') return;
+    $('erreur').textContent = message(e); $('erreur').hidden = false;
+  });
+</script>

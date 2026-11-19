@@ -1,0 +1,242 @@
+---
+import Gerant from '../../layouts/Gerant.astro';
+import Icone from '../../components/Icone.astro';
+---
+<Gerant titre="Commandes" onglet="commandes">
+  <div class="commandes" id="commandes">
+    <section class="col-liste" aria-labelledby="titre-liste">
+      <div class="tete-liste">
+        <h1 class="titre-page" id="titre-liste">Commandes</h1>
+        <button class="btn btn-discret export" type="button" id="export">Exporter (CSV)</button>
+      </div>
+      <div class="filtres" role="group" aria-label="Filtrer par étape" id="filtres">
+        <button type="button" data-statut="recue">À traiter</button>
+        <button type="button" data-statut="confirmee">À expédier</button>
+        <button type="button" data-statut="expediee">Expédiées</button>
+        <button type="button" data-statut="livree">Livrées</button>
+        <button type="button" data-statut="annulee">Annulées</button>
+        <button type="button" data-statut="">Toutes</button>
+      </div>
+      <form class="recherche-cmd" role="search" id="recherche">
+        <label class="sr" for="q">Chercher une commande</label>
+        <Icone nom="chercher" taille={18} />
+        <input id="q" type="search" autocomplete="off" placeholder="Numéro, nom ou téléphone" />
+      </form>
+      <p class="erreur-page" id="erreur" role="alert" hidden></p>
+      <ol class="liste-bons" id="liste" aria-busy="true"></ol>
+      <p class="calme" id="vide" hidden></p>
+    </section>
+
+    <section class="col-bon" id="col-bon" aria-live="polite">
+      <p class="calme invite" id="invite">Choisissez une commande pour ouvrir son bon.</p>
+      <article class="bon-gerant" id="bon" hidden></article>
+    </section>
+  </div>
+</Gerant>
+
+<script>
+  import {
+    commandes, detail, changerStatut, message, dh, quand, STATUTS, ACTIONS, ErreurGerant,
+    type Commande, type DetailCommande, type Statut,
+  } from '../../lib/gerant';
+  import { h, icone } from '../../lib/dom';
+  import { svg } from '../../lib/icones';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const params = new URLSearchParams(location.search);
+  let statut: Statut | null = (params.get('statut') as Statut) || null;
+  let ouvert: string | null = params.get('n');
+  let liste: Commande[] = [];
+  let minuteur: number | undefined;
+
+  const estDemo = () => document.documentElement.dataset.role === 'demo';
+  const insecable = (s: string) => s.replace(/(\d) (ml|g|kg)(?=$|[\s,.])/g, '$1 $2');
+
+  function url() {
+    const p = new URLSearchParams();
+    if (statut) p.set('statut', statut);
+    if (ouvert) p.set('n', ouvert);
+    const q = p.toString();
+    return location.pathname + (q ? `?${q}` : '');
+  }
+
+  function erreurPage(t: string | null) { $('erreur').textContent = t ?? ''; $('erreur').hidden = !t; }
+  document.addEventListener('erreur-arriere', (e) => erreurPage((e as CustomEvent).detail));
+
+  const pastille = (s: Statut) => h('span', { class: `pastille-statut s-${s}` }, STATUTS[s]);
+
+  // ---------------------------------------------------------------- liste
+  async function charger() {
+    $('liste').setAttribute('aria-busy', 'true');
+    document.querySelectorAll<HTMLButtonElement>('#filtres button').forEach((b) =>
+      b.setAttribute('aria-pressed', String((b.dataset.statut || null) === statut)));
+    const q = (document.getElementById('q') as HTMLInputElement).value.trim() || null;
+    try {
+      liste = await commandes(statut, q);
+      erreurPage(null);
+    } catch (e) {
+      if (e instanceof ErreurGerant && e.code === 'non_connecte') return;
+      erreurPage(message(e)); liste = [];
+    }
+    $('liste').replaceChildren(...liste.map((c) => h('li', {},
+      h('a', { class: 'ligne-bon' + (c.numero === ouvert ? ' active' : ''), href: `?${new URLSearchParams({ ...(statut ? { statut } : {}), n: c.numero })}`,
+               'aria-current': c.numero === ouvert ? 'true' : null,
+               onclick: (e: Event) => { e.preventDefault(); ouvrir(c.numero); } },
+        h('span', { class: 'num nombre' }, c.numero),
+        h('span', { class: 'quand' }, quand(c.cree_le)),
+        h('span', { class: 'client' }, c.nom, h('span', { class: 'ville' }, ` · ${c.zone.fr}`)),
+        h('span', { class: 'articles' }, `${c.articles} article${c.articles > 1 ? 's' : ''}`),
+        h('span', { class: 'total nombre' }, dh(c.total)),
+        pastille(c.statut)))));
+    const vide = $('vide');
+    vide.hidden = liste.length > 0;
+    vide.textContent = q ? `Aucune commande ne correspond à « ${q} ».` + (estDemo() ? ' Le compte démo ne cherche que par numéro.' : '')
+      : statut === 'recue' ? 'Rien à traiter : toutes les commandes reçues ont été confirmées ou annulées.'
+      : 'Aucune commande à cette étape.';
+    $('liste').setAttribute('aria-busy', 'false');
+  }
+
+  // ---------------------------------------------------------------- bon de commande
+  function rendreBon(d: DetailCommande) {
+    const bon = $('bon');
+    const demo = estDemo();
+    const tel = d.telephone;
+    const contact = !demo && /^0\d{9}$/.test(tel) ? h('p', { class: 'contact' },
+      h('a', { class: 'btn btn-discret', href: `tel:${tel}` }, icone(svg('telephone', 18)), 'Appeler'),
+      h('a', { class: 'btn btn-whatsapp', href: `https://wa.me/212${tel.slice(1)}?text=${encodeURIComponent(`Bonjour ${d.nom.split(' ')[0]}, c’est Dar Hdiya au sujet de votre commande ${d.numero}.`)}`,
+               target: '_blank', rel: 'noopener' }, icone(svg('message', 18)), 'WhatsApp')) : null;
+
+    const err = h('p', { class: 'erreur', role: 'alert', hidden: true });
+    const suivantes = d.suivantes.filter((s) => s !== 'annulee');
+    const peutAnnuler = d.suivantes.includes('annulee');
+
+    const agir = async (s: Statut, motif: string | null, bouton: HTMLButtonElement) => {
+      err.hidden = true; bouton.disabled = true;
+      const texte = bouton.textContent; bouton.textContent = 'La base vérifie…';
+      try {
+        const r = await changerStatut(d.numero, s, motif);
+        rendreBon(r); charger();
+        document.dispatchEvent(new CustomEvent('statut-change'));
+      } catch (x) {
+        err.textContent = message(x); err.hidden = false;
+        bouton.disabled = false; bouton.textContent = texte;
+        if (x instanceof ErreurGerant && x.code === 'transition_interdite') ouvrir(d.numero, false);
+      }
+    };
+
+    const formAnnul = h('form', { class: 'annulation', hidden: true, novalidate: true },
+      h('label', { for: 'motif-annul' }, 'Pourquoi annuler ? Le stock revient en rayon.'),
+      h('input', { id: 'motif-annul', type: 'text', maxlength: 200, autocomplete: 'off', placeholder: 'ex. client injoignable' }),
+      h('div', { class: 'actions' },
+        h('button', { type: 'submit', class: 'btn btn-encre' }, 'Confirmer l’annulation'),
+        h('button', { type: 'button', class: 'btn btn-discret', onclick: () => { formAnnul.hidden = true; } }, 'Garder la commande')));
+    formAnnul.addEventListener('submit', (e) => {
+      e.preventDefault();
+      agir('annulee', (formAnnul.querySelector('input') as HTMLInputElement).value, formAnnul.querySelector('button[type=submit]')!);
+    });
+
+    bon.replaceChildren(...[
+      h('button', { type: 'button', class: 'retour-liste lien', onclick: () => fermerBon() }, icone(svg('retour', 18)), 'Toutes les commandes'),
+      h('header', { class: 'tete-bon' },
+        h('h2', { class: 'num-bon nombre' }, d.numero),
+        pastille(d.statut),
+        h('p', { class: 'quand' }, `Reçue ${quand(d.cree_le)}`)),
+      h('section', { class: 'client-bon' },
+        h('p', { class: 'nom-client' }, d.nom),
+        h('p', { class: 'nombre' }, d.telephone),
+        h('p', {}, d.adresse ?? 'Adresse masquée (compte démo)'),
+        h('p', { class: 'ville' }, d.zone.fr),
+        contact),
+      h('ol', { class: 'lignes-bon' },
+        ...d.lignes.map((l) => h('li', {},
+          h('span', { class: 'ligne-nom' }, `${l.quantite} × ${insecable(l.nom.fr)}`),
+          h('span', { class: 'ligne-montant nombre' }, dh(l.quantite * l.prix)))),
+        h('li', { class: 'sous' }, h('span', {}, 'Sous-total'), h('span', { class: 'nombre' }, dh(d.sous_total))),
+        d.remise > 0 ? h('li', { class: 'sous' }, h('span', {}, `Remise ${d.code_promo ?? ''}`), h('span', { class: 'nombre' }, `− ${dh(d.remise)}`)) : null,
+        h('li', { class: 'sous' }, h('span', {}, `Livraison ${d.zone.fr}`), h('span', { class: 'nombre' }, d.frais > 0 ? dh(d.frais) : 'offerte')),
+        h('li', { class: 'total-bon' }, h('span', {}, 'À encaisser'), h('span', { class: 'nombre' }, dh(d.total)))),
+      h('p', { class: 'paiement' }, 'Paiement à la livraison'),
+      err,
+      (suivantes.length || peutAnnuler) ? h('div', { class: 'actions-bon' },
+        ...suivantes.map((s, i) => h('button', { type: 'button', class: i === 0 ? 'btn btn-action' : 'btn btn-discret',
+          onclick: (e: Event) => agir(s, null, e.currentTarget as HTMLButtonElement) }, ACTIONS[s])),
+        peutAnnuler ? h('button', { type: 'button', class: 'lien annuler', onclick: () => {
+          formAnnul.hidden = false; (formAnnul.querySelector('input') as HTMLInputElement).focus(); } }, 'Annuler la commande') : null)
+        : h('p', { class: 'fin-circuit' }, d.statut === 'livree' ? 'Livrée et encaissée : rien d’autre à faire.' : 'Commande annulée : le stock est revenu en rayon.'),
+      formAnnul,
+      d.historique.length ? h('section', { class: 'historique' },
+        h('h3', {}, 'Historique'),
+        h('ol', {}, ...d.historique.map((x) => h('li', {},
+          h('span', { class: 'quand' }, quand(x.quand)),
+          h('span', {}, `${x.qui} : ${STATUTS[x.avant]} → ${STATUTS[x.apres]}`),
+          x.motif ? h('span', { class: 'motif' }, `« ${x.motif} »`) : null)))) : null,
+    ].filter((n): n is HTMLElement => n !== null));
+    bon.hidden = false;
+    $('invite').hidden = true;
+  }
+
+  async function ouvrir(numero: string, pousser = true) {
+    ouvert = numero;
+    if (pousser) history.pushState(null, '', url());
+    document.body.classList.add('bon-ouvert');
+    document.querySelectorAll('.ligne-bon').forEach((a) => {
+      const actif = a.querySelector('.num')?.textContent === numero;
+      a.classList.toggle('active', actif);
+      actif ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current');
+    });
+    try {
+      rendreBon(await detail(numero));
+      if (matchMedia('(max-width: 959px)').matches) scrollTo({ top: 0 });
+    } catch (e) {
+      if (e instanceof ErreurGerant && e.code === 'non_connecte') return;
+      erreurPage(message(e)); fermerBon();
+    }
+  }
+
+  function fermerBon(pousser = true) {
+    ouvert = null;
+    if (pousser) history.pushState(null, '', url());
+    document.body.classList.remove('bon-ouvert');
+    $('bon').hidden = true; $('invite').hidden = false;
+    document.querySelectorAll('.ligne-bon.active').forEach((a) => { a.classList.remove('active'); a.removeAttribute('aria-current'); });
+  }
+
+  // ---------------------------------------------------------------- export CSV (ce que la base a montré)
+  $('export').addEventListener('click', () => {
+    const cols = ['numero', 'cree_le', 'statut', 'nom', 'telephone', 'ville', 'articles', 'sous_total', 'remise', 'frais', 'total', 'code_promo'] as const;
+    const cell = (v: unknown) => { const s = v === null || v === undefined ? '' : String(v); return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const lignes = [cols.join(';'), ...liste.map((c) => cols.map((k) => cell(k === 'statut' ? STATUTS[c.statut] : c[k])).join(';'))];
+    const blob = new Blob(['﻿' + lignes.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = h('a', { href: URL.createObjectURL(blob), download: `commandes-dar-hdiya-${statut ?? 'toutes'}-${new Date().toISOString().slice(0, 10)}.csv` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+
+  // ---------------------------------------------------------------- événements
+  $('filtres').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest('button');
+    if (!b) return;
+    statut = (b.dataset.statut as Statut) || null;
+    history.replaceState(null, '', url());
+    charger();
+  });
+  $('recherche').addEventListener('submit', (e) => { e.preventDefault(); charger(); });
+  $('q').addEventListener('input', () => { clearTimeout(minuteur); minuteur = window.setTimeout(charger, 300); });
+  addEventListener('popstate', () => {
+    const p = new URLSearchParams(location.search);
+    statut = (p.get('statut') as Statut) || null;
+    const n = p.get('n');
+    charger();
+    n ? ouvrir(n, false) : fermerBon(false);
+  });
+
+  // Sur grand écran, le bon de la commande la plus urgente est ouvert d'office.
+  charger().then(() => {
+    if (!ouvert && liste.length && matchMedia('(min-width: 960px)').matches) {
+      // la plus ancienne commande reçue (la plus urgente), sinon la plus récente
+      const recues = liste.filter((c) => c.statut === 'recue');
+      ouvrir((recues.length ? recues[recues.length - 1] : liste[0]).numero, false);
+    }
+  });
+  if (ouvert) ouvrir(ouvert, false);
+</script>

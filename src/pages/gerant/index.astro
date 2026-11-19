@@ -1,0 +1,243 @@
+---
+import Gerant from '../../layouts/Gerant.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<Gerant titre="Réserve" onglet="reserve">
+  <h1 class="sr">Réserve</h1>
+
+  <section class="bandeau" aria-live="polite">
+    <div class="bandeau-texte">
+      <p class="bandeau-titre" id="b-titre">Lecture de la réserve…</p>
+      <p class="bandeau-sous nombre" id="b-sous"></p>
+    </div>
+    <a class="btn btn-action" id="b-traiter" href={`${base}/gerant/commandes/?statut=recue`} hidden>Traiter</a>
+  </section>
+
+  <p class="erreur-page" id="erreur" role="alert" hidden></p>
+
+  <div class="reserve" id="reserve" aria-busy="true">
+    <aside class="col-alertes">
+      <section class="bloc">
+        <h2 class="titre-bloc">À surveiller</h2>
+        <ul class="lignes" id="alertes"></ul>
+        <p class="calme" id="alertes-vide" hidden>Aucune rupture, aucun stock bas. La réserve est pleine.</p>
+      </section>
+      <section class="bloc semaine">
+        <h2 class="titre-bloc">Les 7 derniers jours</h2>
+        <ol class="registre" id="semaine"></ol>
+        <p class="note">Commandes annulées non comptées. Heure de Casablanca.</p>
+      </section>
+    </aside>
+    <div class="col-rayons" id="rayons"></div>
+  </div>
+</Gerant>
+
+<script>
+  import {
+    tableau, stock, ajusterStock, mettreEnVente, message, dh, RAYONS, ErreurGerant,
+    type ProduitStock, type Tableau,
+  } from '../../lib/gerant';
+  import photos from '../../data/photos.json';
+  import { h, icone } from '../../lib/dom';
+  import { svg } from '../../lib/icones';
+
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const BAS = 3;
+  const MOTIFS = ['Arrivage', 'Recompte', 'Casse', 'Retour client'];
+  const produits = new Map<number, ProduitStock>();
+  let codes: Record<number, string> = {};
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const insecable = (s: string) => s.replace(/(\d) (ml|g|kg)(?=$|[\s,.])/g, '$1 $2');
+  const pluriel = (n: number, un: string, plusieurs: string) => `${n} ${n > 1 ? plusieurs : un}`;
+
+  function erreurPage(texte: string | null) {
+    const e = $('erreur');
+    e.textContent = texte ?? '';
+    e.hidden = !texte;
+  }
+  document.addEventListener('erreur-arriere', (e) => erreurPage((e as CustomEvent).detail));
+
+  function calculerCodes(liste: ProduitStock[]) {
+    codes = {};
+    for (const [cat, lettre] of RAYONS) {
+      liste.filter((p) => p.categorie === cat && p.actif).sort((a, b) => a.id - b.id)
+        .forEach((p, i) => { codes[p.id] = `${lettre}-${String(i + 1).padStart(2, '0')}`; });
+    }
+  }
+
+  function etat(p: ProduitStock): HTMLElement | null {
+    if (!p.actif) return h('span', { class: 'etat etat-retire' }, 'Retiré');
+    if (p.stock === 0) return h('span', { class: 'etat etat-rupture' }, 'Rupture');
+    if (p.stock <= BAS) return h('span', { class: 'etat etat-bas' }, `Plus que ${p.stock}`);
+    return null;
+  }
+
+  // ---------------------------------------------------------------- une ligne de réserve
+  function ligne(p: ProduitStock): HTMLLIElement {
+    const ph = (photos as Record<string, { fichier: string }>)[p.slug];
+    const li = h('li', { class: 'ligne' + (p.actif ? '' : ' ligne-retiree'), 'data-id': p.id },
+      ph ? h('img', { class: 'vignette', src: `${base}/photos/${ph.fichier}`, alt: '', width: 56, height: 56, loading: 'lazy' })
+         : h('span', { class: 'vignette vignette-vide', 'aria-hidden': 'true' }),
+      h('div', { class: 'designation' },
+        h('span', { class: 'code nombre' }, codes[p.id] ?? '—'),
+        h('span', { class: 'nom' }, insecable(p.nom.fr)),
+        h('span', { class: 'ventes' }, `${pluriel(p.vendus_30j, 'vendu', 'vendus')} en 30 j · ${dh(p.prix)}`)),
+      h('div', { class: 'compte-stock' },
+        h('s', { class: 'ancien nombre', hidden: true }),
+        h('span', { class: 'chiffre nombre', 'aria-label': `Stock : ${p.stock}` }, p.stock),
+        h('span', { class: 'tampon-base', hidden: true }, 'compté par la base')),
+      h('div', { class: 'etat-place' }, etat(p)),
+      h('button', { class: 'corriger', type: 'button', 'aria-expanded': 'false', onclick: () => ouvrir(li) },
+        icone(svg('crayon', 16)), 'Corriger'),
+    );
+    return li;
+  }
+
+  /** Met à jour toutes les copies d'une ligne (un produit peut être « à surveiller » et dans son rayon). */
+  function rafraichir(p: ProduitStock, ancien?: number) {
+    produits.set(p.id, p);
+    document.querySelectorAll<HTMLLIElement>(`li.ligne[data-id="${p.id}"]`).forEach((li) => {
+      const chiffre = li.querySelector<HTMLElement>('.chiffre')!;
+      const s = li.querySelector<HTMLElement>('.ancien')!;
+      const tampon = li.querySelector<HTMLElement>('.tampon-base')!;
+      chiffre.textContent = String(p.stock);
+      chiffre.setAttribute('aria-label', `Stock : ${p.stock}`);
+      if (ancien !== undefined && ancien !== p.stock) {
+        s.textContent = String(ancien); s.hidden = false;
+        chiffre.classList.remove('ecrit'); void chiffre.offsetWidth; chiffre.classList.add('ecrit');
+        tampon.hidden = false;
+      }
+      li.classList.toggle('ligne-retiree', !p.actif);
+      li.querySelector('.etat-place')!.replaceChildren(...[etat(p)].filter(Boolean) as Node[]);
+      const bouton = li.querySelector('.form-correction .vente') as HTMLButtonElement | null;
+      if (bouton) bouton.textContent = p.actif ? 'Retirer de la vente' : 'Remettre en vente';
+    });
+  }
+
+  // ---------------------------------------------------------------- correction de stock
+  function fermer(li: HTMLLIElement) {
+    li.querySelector('.form-correction')?.remove();
+    li.querySelector('.corriger')!.setAttribute('aria-expanded', 'false');
+    li.classList.remove('ouverte');
+  }
+
+  function ouvrir(li: HTMLLIElement) {
+    const id = Number(li.dataset.id);
+    if (li.querySelector('.form-correction')) return fermer(li);
+    document.querySelectorAll<HTMLLIElement>('li.ligne.ouverte').forEach(fermer);
+    const p = produits.get(id)!;
+    let vu = p.stock;
+    const champ = h('input', { type: 'number', inputmode: 'numeric', min: 0, max: 9999, value: p.stock,
+                               id: `n-${id}`, class: 'champ-stock nombre', required: true });
+    const motif = h('input', { type: 'text', id: `m-${id}`, maxlength: 200, autocomplete: 'off',
+                               placeholder: 'ex. arrivage du souk' });
+    const err = h('p', { class: 'erreur', role: 'alert', hidden: true });
+    const pas = (d: number) => () => { champ.value = String(Math.max(0, Math.min(9999, (Number(champ.value) || 0) + d))); };
+    const enregistrer = h('button', { class: 'btn btn-encre', type: 'submit' }, 'Enregistrer');
+
+    const form = h('form', { class: 'form-correction', novalidate: true },
+      h('div', { class: 'rangee' },
+        h('label', { for: `n-${id}` }, 'Nouveau stock'),
+        h('div', { class: 'pas-a-pas' },
+          h('button', { type: 'button', 'aria-label': 'Un de moins', onclick: pas(-1) }, icone(svg('moins', 18))),
+          champ,
+          h('button', { type: 'button', 'aria-label': 'Un de plus', onclick: pas(1) }, icone(svg('plus', 18))))),
+      h('div', { class: 'rangee' },
+        h('label', { for: `m-${id}` }, 'Motif'),
+        h('div', { class: 'motifs' }, ...MOTIFS.map((m) =>
+          h('button', { type: 'button', class: 'puce-motif', onclick: () => { motif.value = m.toLowerCase(); motif.focus(); } }, m))),
+        motif),
+      err,
+      h('div', { class: 'actions' },
+        enregistrer,
+        h('button', { type: 'button', class: 'btn btn-discret', onclick: () => fermer(li) }, 'Fermer'),
+        h('button', { type: 'button', class: 'vente lien', onclick: async (e: Event) => {
+          const b = e.currentTarget as HTMLButtonElement;
+          const actuel = produits.get(id)!;
+          b.disabled = true;
+          try {
+            const r = await mettreEnVente(id, !actuel.actif);
+            rafraichir({ ...actuel, actif: r.actif });
+          } catch (x) { err.textContent = message(x); err.hidden = false; }
+          b.disabled = false;
+        } }, p.actif ? 'Retirer de la vente' : 'Remettre en vente')),
+    );
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.hidden = true;
+      const nouveau = Number(champ.value);
+      if (!Number.isInteger(nouveau) || champ.value === '') { err.textContent = message(new ErreurGerant('stock_invalide')); err.hidden = false; return; }
+      enregistrer.disabled = true; enregistrer.textContent = 'La base compte…';
+      try {
+        const r = await ajusterStock(id, vu, nouveau, motif.value);
+        const avant = produits.get(id)!;
+        rafraichir({ ...avant, stock: r.stock }, avant.stock);
+        fermer(li);
+      } catch (x) {
+        err.textContent = message(x); err.hidden = false;
+        if (x instanceof ErreurGerant && x.code === 'stock_modifie') {
+          // Une vente est passée : on relit la réserve et on montre le nouveau compte.
+          const frais = (await stock().catch(() => [])).find((q) => q.id === id);
+          if (frais) { const avant = produits.get(id)!.stock; vu = frais.stock; rafraichir(frais, avant); }
+        }
+      } finally {
+        enregistrer.disabled = false; enregistrer.textContent = 'Enregistrer';
+      }
+    });
+
+    li.append(form);
+    li.classList.add('ouverte');
+    li.querySelector('.corriger')!.setAttribute('aria-expanded', 'true');
+    champ.focus(); champ.select();
+  }
+
+  // ---------------------------------------------------------------- bandeau, alertes, semaine, rayons
+  function bandeau(t: Tableau) {
+    const n = t.a_traiter;
+    $('b-titre').textContent = n ? `${pluriel(n, 'commande', 'commandes')} à traiter` : 'Aucune commande à traiter';
+    const parts = [`${dh(t.aujourdhui.chiffre)} aujourd’hui`, pluriel(t.aujourdhui.commandes, 'commande', 'commandes')];
+    if (t.a_expedier) parts.push(`${t.a_expedier} à expédier`);
+    $('b-sous').textContent = parts.join(' · ');
+    $('b-traiter').hidden = n === 0;
+  }
+
+  const FMT = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  function semaine(t: Tableau) {
+    const ol = $('semaine');
+    ol.replaceChildren(...t.semaine.map((j, i) => h('li', { class: i === t.semaine.length - 1 ? 'aujourdhui' : '' },
+      h('span', { class: 'jour' }, i === t.semaine.length - 1 ? 'aujourd’hui' : FMT.format(new Date(j.jour + 'T00:00:00Z'))),
+      h('span', { class: 'n nombre' }, j.commandes ? pluriel(j.commandes, 'cde', 'cdes') : '—'),
+      h('span', { class: 'montant nombre' }, j.chiffre ? dh(j.chiffre) : ''))));
+    const total = t.semaine.reduce((s, j) => s + Number(j.chiffre), 0);
+    ol.append(h('li', { class: 'total' }, h('span', { class: 'jour' }, 'Total'),
+      h('span', { class: 'n nombre' }, pluriel(t.semaine.reduce((s, j) => s + j.commandes, 0), 'cde', 'cdes')),
+      h('span', { class: 'montant nombre' }, dh(total))));
+  }
+
+  function rayons(liste: ProduitStock[]) {
+    const surveiller = liste.filter((p) => p.actif && p.stock <= BAS);
+    $('alertes').replaceChildren(...surveiller.map(ligne));
+    $('alertes-vide').hidden = surveiller.length > 0;
+    $('rayons').replaceChildren(...RAYONS.map(([cat, lettre, nom]) => {
+      const dans = liste.filter((p) => p.categorie === cat).sort((a, b) =>
+        Number(b.actif) - Number(a.actif) || (codes[a.id] ?? '').localeCompare(codes[b.id] ?? '') || a.id - b.id);
+      return h('section', { class: 'bloc rayon-reserve', id: `rayon-${lettre}` },
+        h('h2', { class: 'titre-rayon' }, h('span', { class: 'lettre' }, lettre), nom,
+          h('span', { class: 'total-rayon nombre' }, pluriel(dans.reduce((s, p) => s + (p.actif ? p.stock : 0), 0), 'pièce', 'pièces'))),
+        h('ul', { class: 'lignes' }, ...dans.map(ligne)));
+    }));
+  }
+
+  Promise.all([tableau(), stock()]).then(([t, liste]) => {
+    liste.forEach((p) => produits.set(p.id, p));
+    calculerCodes(liste);
+    bandeau(t); semaine(t); rayons(liste);
+    $('reserve').setAttribute('aria-busy', 'false');
+  }).catch((e) => {
+    if (e instanceof ErreurGerant && (e.code === 'non_connecte' || e.code === 'acces_refuse')) return; // le gabarit redirige
+    $('b-titre').textContent = 'Réserve indisponible';
+    erreurPage(message(e));
+  });
+</script>

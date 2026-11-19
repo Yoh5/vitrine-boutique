@@ -1,0 +1,66 @@
+---
+import Gerant from '../../layouts/Gerant.astro';
+const demoEmail = import.meta.env.PUBLIC_DEMO_EMAIL ?? '';
+const demoMdp = import.meta.env.PUBLIC_DEMO_MOT_DE_PASSE ?? '';
+---
+<Gerant titre="Connexion" onglet={null}>
+  <div class="porte">
+    <form class="carnet carnet-porte" id="connexion" novalidate>
+      <h1>Arrière-boutique</h1>
+      <p class="sous-titre">Réservée au gérant : stock, commandes, journal.</p>
+      <div class="champ">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="username" required />
+      </div>
+      <div class="champ">
+        <label for="mdp">Mot de passe</label>
+        <input id="mdp" type="password" autocomplete="current-password" required />
+      </div>
+      <p class="erreur" id="erreur" role="alert" hidden></p>
+      <button class="btn btn-action" type="submit" id="entrer">Entrer</button>
+    </form>
+
+    {demoEmail && demoMdp && (
+      <section class="essai" aria-labelledby="titre-essai">
+        <h2 id="titre-essai">Vous êtes commerçant et voulez essayer ?</h2>
+        <p>Entrez avec le compte de démonstration. La base lui masque les noms, téléphones et adresses
+          des clients ; le reste fonctionne vraiment.</p>
+        <button class="btn btn-clair" type="button" id="essayer" data-email={demoEmail} data-mdp={demoMdp}>
+          Entrer avec le compte démo</button>
+      </section>
+    )}
+  </div>
+</Gerant>
+
+<script>
+  import { connecter, lireSession, message } from '../../lib/gerant';
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const retour = new URLSearchParams(location.search).get('retour');
+  const destination = retour && retour.startsWith(`${base}/gerant/`) ? retour : `${base}/gerant/`;
+  if (lireSession()) location.replace(destination);
+
+  const form = document.getElementById('connexion') as HTMLFormElement;
+  const email = document.getElementById('email') as HTMLInputElement;
+  const mdp = document.getElementById('mdp') as HTMLInputElement;
+  const err = document.getElementById('erreur')!;
+  const entrer = document.getElementById('entrer') as HTMLButtonElement;
+
+  async function essayer(e: string, m: string) {
+    err.hidden = true;
+    if (!e || !m) { err.textContent = 'Indiquez l’e-mail et le mot de passe.'; err.hidden = false; return; }
+    entrer.disabled = true; entrer.textContent = 'Vérification…';
+    try {
+      await connecter(e, m);
+      location.replace(destination);
+    } catch (x) {
+      err.textContent = message(x); err.hidden = false;
+      entrer.disabled = false; entrer.textContent = 'Entrer';
+    }
+  }
+  form.addEventListener('submit', (e) => { e.preventDefault(); essayer(email.value, mdp.value); });
+  document.getElementById('essayer')?.addEventListener('click', (e) => {
+    const b = e.currentTarget as HTMLButtonElement;
+    email.value = b.dataset.email ?? ''; mdp.value = b.dataset.mdp ?? '';
+    essayer(email.value, mdp.value);
+  });
+</script>
