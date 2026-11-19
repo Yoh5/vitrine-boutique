@@ -10,3 +10,13 @@ grant usage on schema public to anon, authenticated;
 alter default privileges in schema public grant all on tables    to anon, authenticated;
 alter default privileges in schema public grant all on sequences to anon, authenticated;
 alter default privileges in schema public grant all on functions to anon, authenticated;
+
+-- Supabase Auth, réduit à ce que l'espace du gérant utilise : la table des comptes et auth.uid(),
+-- qui lit l'identifiant (« sub ») du jeton transmis par l'API, exactement comme sur Supabase.
+create schema if not exists auth;
+create table if not exists auth.users (id uuid primary key, email text unique);
+create or replace function auth.uid() returns uuid language sql stable as $$
+  select nullif(coalesce(current_setting('request.jwt.claim.sub', true),
+                         (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')), '')::uuid
+$$;
+grant usage on schema auth to anon, authenticated;

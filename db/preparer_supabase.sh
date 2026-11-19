@@ -4,5 +4,8 @@
 set -e
 cd "$(dirname "$0")"
 { echo "-- Généré par preparer_supabase.sh le $(date -u +%Y-%m-%dT%H:%MZ). Ne pas modifier ici."
-  cat schema.sql seed.sql descriptions.sql; } > supabase_complet.sql
-echo "db/supabase_complet.sql prêt ($(wc -l < supabase_complet.sql) lignes)"
+  cat schema.sql seed.sql descriptions.sql gerant.sql; } > supabase_complet.sql
+# Pour un projet déjà en ligne (boutique installée avant l'espace du gérant) : seulement gerant.sql.
+{ echo "-- Généré par preparer_supabase.sh le $(date -u +%Y-%m-%dT%H:%MZ). Espace du gérant seul."
+  cat gerant.sql; } > supabase_gerant.sql
+echo "db/supabase_complet.sql prêt ($(wc -l < supabase_complet.sql) lignes), db/supabase_gerant.sql prêt ($(wc -l < supabase_gerant.sql) lignes)"

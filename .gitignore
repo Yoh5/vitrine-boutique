@@ -8,3 +8,4 @@ dist/
 .playwright-mcp/
 .impeccable/review/
 db/supabase_complet.sql
+db/supabase_gerant.sql
