@@ -54,7 +54,7 @@ body.arriere { background: var(--mur); }
 .avis-demo { margin: 0; background: var(--kraft-clair); color: var(--encre); font-size: 0.9rem; padding-block: 0.55rem; }
 .avis-demo .contenu { display: block; }
 
-.pied-arriere { background: var(--encre); color: var(--mur); font-size: 0.9rem; padding-block: 1.2rem; }
+.pied-arriere { background: var(--encre); color: var(--mur); font-size: 0.9rem; padding-block: 1.2rem 4.5rem; } /* place pour le badge de l'hébergeur */
 .pied-arriere p { margin: 0; }
 .pied-arriere a { color: var(--kraft-clair); }
 
